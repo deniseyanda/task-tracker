@@ -15,6 +15,13 @@
       "when": 1772246570134,
       "tag": "0001_pale_gamora",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1772247745324,
+      "tag": "0002_chief_falcon",
+      "breakpoints": true
     }
   ]
 }

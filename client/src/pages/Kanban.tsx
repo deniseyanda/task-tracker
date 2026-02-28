@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { AlertTriangle, Calendar, CalendarCheck, Clock, GripVertical, Loader2, Plus, Search, Tag, Trash2, X } from "lucide-react";
+import { AlertTriangle, Calendar, CalendarCheck, Clock, ExternalLink, FolderOpen, GripVertical, Loader2, Plus, Search, Tag, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -381,6 +381,12 @@ function TaskModal({
   const [estimatedHours, setEstimatedHours] = useState("");
   const [selectedTags, setSelectedTags] = useState<number[]>([]);
   const [newSubtask, setNewSubtask] = useState("");
+  const [driveClientName, setDriveClientName] = useState<string>("");
+  const [driveClientPath, setDriveClientPath] = useState<string>("");
+  const [showClientPicker, setShowClientPicker] = useState(false);
+  const [clientSearch, setClientSearch] = useState("");
+
+  const { data: driveClients = [] } = trpc.drive.listClients.useQuery();
 
   const { data: taskDetail } = trpc.tasks.get.useQuery(
     { id: task?.id ?? 0 },
@@ -405,6 +411,8 @@ function TaskModal({
       setProjectId(task.projectId ? String(task.projectId) : "none");
       setDeadline(task.deadline ? new Date(task.deadline).toISOString().split("T")[0] : "");
       setSelectedTags(task.tags?.map((t) => t.id) ?? []);
+      setDriveClientName((taskDetail as any)?.driveClientName ?? "");
+      setDriveClientPath((taskDetail as any)?.driveClientPath ?? "");
     } else {
       setTitle("");
       setDescription("");
@@ -415,8 +423,10 @@ function TaskModal({
       setDeadline("");
       setEstimatedHours("");
       setSelectedTags([]);
+      setDriveClientName("");
+      setDriveClientPath("");
     }
-  }, [task, defaultStatus, open]);
+  }, [task, defaultStatus, open, taskDetail]);
 
   const createTask = trpc.tasks.create.useMutation({ onSuccess: onSaved });
   const updateTask = trpc.tasks.update.useMutation({ onSuccess: onSaved });
@@ -435,6 +445,8 @@ function TaskModal({
       deadline: deadline ? new Date(deadline).getTime() : undefined,
       estimatedHours: estimatedHours ? parseInt(estimatedHours) : undefined,
       tagIds: selectedTags,
+      driveClientName: driveClientName || undefined,
+      driveClientPath: driveClientPath || undefined,
     };
 
     if (isEdit && task) {
@@ -581,6 +593,81 @@ function TaskModal({
                   className="border-black text-sm"
                 />
               </div>
+            </div>
+
+            {/* Drive Client */}
+            <div>
+              <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Cliente (Google Drive)</Label>
+              {driveClientName ? (
+                <div className="flex items-center gap-2 border border-black p-2">
+                  <FolderOpen className="h-4 w-4 text-[oklch(0.45_0.22_27)] shrink-0" />
+                  <span className="text-sm font-medium flex-1 truncate">{driveClientName}</span>
+                  <a
+                    href={`https://drive.google.com/drive/search?q=${encodeURIComponent(driveClientName)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1 hover:bg-gray-100"
+                    title="Abrir no Drive"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => { setDriveClientName(""); setDriveClientPath(""); }}
+                    className="p-1 hover:bg-gray-100"
+                  >
+                    <X className="h-3.5 w-3.5 text-gray-400" />
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowClientPicker(!showClientPicker)}
+                    className="flex items-center gap-2 text-xs font-medium border border-dashed border-gray-300 hover:border-black px-3 py-2 w-full transition-colors"
+                  >
+                    <FolderOpen className="h-3.5 w-3.5 text-gray-400" />
+                    Vincular cliente do Drive
+                  </button>
+                  {showClientPicker && (
+                    <div className="mt-1 border border-black bg-white shadow-lg z-10">
+                      <div className="p-2 border-b border-gray-100">
+                        <input
+                          type="text"
+                          placeholder="Buscar cliente..."
+                          value={clientSearch}
+                          onChange={(e) => setClientSearch(e.target.value)}
+                          className="w-full text-xs border border-gray-200 px-2 py-1.5 outline-none focus:border-black"
+                          autoFocus
+                        />
+                      </div>
+                      <div className="max-h-48 overflow-y-auto">
+                        {driveClients
+                          .filter((c) => c.name.toLowerCase().includes(clientSearch.toLowerCase()))
+                          .map((c) => (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => {
+                                setDriveClientName(c.name);
+                                setDriveClientPath(c.path);
+                                setShowClientPicker(false);
+                                setClientSearch("");
+                              }}
+                              className="w-full text-left flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-xs border-b border-gray-50 last:border-b-0"
+                            >
+                              <FolderOpen className="h-3.5 w-3.5 text-[oklch(0.45_0.22_27)] shrink-0" />
+                              {c.name}
+                            </button>
+                          ))}
+                        {driveClients.filter((c) => c.name.toLowerCase().includes(clientSearch.toLowerCase())).length === 0 && (
+                          <div className="px-3 py-4 text-xs text-gray-400 text-center">Nenhum cliente encontrado</div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Tags */}

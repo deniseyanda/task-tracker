@@ -10,6 +10,7 @@ import Projects from "./pages/Projects";
 import Tags from "./pages/Tags";
 import Reports from "./pages/Reports";
 import Assistant from "./pages/Assistant";
+import Clients from "./pages/Clients";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/tags" component={Tags} />
       <Route path="/relatorios" component={Reports} />
       <Route path="/assistente" component={Assistant} />
+      <Route path="/clientes" component={Clients} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

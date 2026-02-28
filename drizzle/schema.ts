@@ -68,6 +68,8 @@ export const tasks = mysqlTable("tasks", {
   notifiedDeadline: timestamp("notifiedDeadline"), // when 24h notification was sent
   notifiedOverdue: timestamp("notifiedOverdue"), // when overdue notification was sent
   completedAt: bigint("completedAt", { mode: "number" }), // UTC ms when completed
+  driveClientName: varchar("driveClientName", { length: 255 }), // Google Drive client folder name
+  driveClientPath: varchar("driveClientPath", { length: 500 }), // Google Drive client folder path
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

@@ -41,3 +41,12 @@
 - [x] Testes vitest: CRUD de tarefas com filtros
 - [x] Testes vitest: dashboard stats
 - [x] Testes vitest: notificações
+
+## Integração Google Drive
+- [x] Schema: adicionar campo driveClientName e driveClientPath nas tarefas
+- [x] Backend: router Drive (listar clientes, listar arquivos, busca, gerar links)
+- [x] Frontend: página Clientes com painel Drive e lista de documentos
+- [x] Frontend: seletor de cliente no modal de tarefas
+- [x] Frontend: card de cliente nas tarefas do Kanban com link direto
+- [x] Frontend: busca rápida de clientes e documentos
+- [x] Sidebar: adicionar item "Clientes" na navegação

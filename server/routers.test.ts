@@ -34,6 +34,10 @@ vi.mock("./db", () => ({
   getOverdueTasks: vi.fn().mockResolvedValue([]),
   markNotifiedDeadline: vi.fn().mockResolvedValue(undefined),
   markNotifiedOverdue: vi.fn().mockResolvedValue(undefined),
+  listClients: vi.fn().mockResolvedValue([]),
+  listClientFiles: vi.fn().mockResolvedValue([]),
+  search: vi.fn().mockResolvedValue({ clients: [], files: [], total: 0 }),
+  getShareLink: vi.fn().mockResolvedValue({ url: "https://drive.google.com/test" }),
   getWeeklyReportData: vi.fn().mockResolvedValue({
     completed: [],
     completedCount: 0,
@@ -266,5 +270,48 @@ describe("notifications", () => {
     const caller = appRouter.createCaller(ctx);
     const result = await caller.notifications.weeklyReport();
     expect(result).toHaveProperty("sent");
+  });
+});
+
+// ─── Drive Tests ──────────────────────────────────────────────────────────────
+
+describe("drive", () => {
+  it("listClients returns empty array initially", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const result = await caller.drive.listClients();
+    expect(Array.isArray(result)).toBe(true);
+  });
+
+  it("listClientFiles requires clientName", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const result = await caller.drive.listClientFiles({ clientName: "AKAKON - Canela" });
+    expect(Array.isArray(result)).toBe(true);
+  });
+
+  it("search returns structured result", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const result = await caller.drive.search({ query: "pontao" });
+    expect(result).toHaveProperty("clients");
+    expect(result).toHaveProperty("files");
+    expect(result).toHaveProperty("total");
+    expect(Array.isArray(result.clients)).toBe(true);
+    expect(Array.isArray(result.files)).toBe(true);
+  });
+
+  it("search requires at least 1 character", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    await expect(caller.drive.search({ query: "" })).rejects.toThrow();
+  });
+
+  it("getShareLink returns url for folder", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const result = await caller.drive.getShareLink({ fileId: "abc123", isDir: true });
+    expect(result).toHaveProperty("url");
+    expect(typeof result.url).toBe("string");
   });
 });

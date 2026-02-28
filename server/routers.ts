@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { calendarRouter } from "./routers/calendar";
+import { driveRouter } from "./routers/drive";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
@@ -121,6 +122,8 @@ const tasksRouter = router({
       estimatedHours: z.number().nullable().optional(),
       actualHours: z.number().nullable().optional(),
       calendarEventId: z.string().nullable().optional(),
+      driveClientName: z.string().nullable().optional(),
+      driveClientPath: z.string().nullable().optional(),
       tagIds: z.array(z.number()).optional(),
     }))
     .mutation(({ ctx, input }) => {
@@ -415,6 +418,7 @@ export const appRouter = router({
   ai: aiRouter,
   notifications: notificationsRouter,
   calendar: calendarRouter,
+  drive: driveRouter,
 });
 
 export type AppRouter = typeof appRouter;
