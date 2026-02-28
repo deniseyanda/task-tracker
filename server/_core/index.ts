@@ -8,6 +8,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { startDailyJobScheduler } from "../dailyJob";
+import importRouter from "../routers/import";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -36,6 +37,8 @@ async function startServer() {
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   // OAuth callback under /api/oauth/callback
   registerOAuthRoutes(app);
+  // Import routes (multipart file upload — must be before tRPC)
+  app.use("/api/import", importRouter);
   // tRPC API
   app.use(
     "/api/trpc",

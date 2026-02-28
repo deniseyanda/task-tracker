@@ -13,6 +13,7 @@ import Assistant from "./pages/Assistant";
 import Clients from "./pages/Clients";
 import Collaborators from "./pages/Collaborators";
 import JoinWorkspace from "./pages/JoinWorkspace";
+import Import from "./pages/Import";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/clientes" component={Clients} />
       <Route path="/colaboradores" component={Collaborators} />
       <Route path="/entrar" component={JoinWorkspace} />
+      <Route path="/importar" component={Import} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

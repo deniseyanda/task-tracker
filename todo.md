@@ -84,3 +84,11 @@
 - [x] Job diário às 8h: verificar prazos e gerar notificações para todos os usuários
 - [x] Lógica de fuso horário (America/Sao_Paulo)
 - [x] Log de execução do job no servidor
+
+## Importação de Tarefas via Excel
+- [x] Analisar colunas do arquivo Excel original e mapear para o schema
+- [x] Backend: instalar xlsx, endpoint de upload e parse do Excel
+- [x] Backend: endpoint de importação com criação de projetos e tarefas
+- [x] Frontend: página de importação com upload, preview e confirmação
+- [x] Frontend: feedback de progresso e resumo pós-importação
+- [x] Sidebar: adicionar item "Importar" na navegação
