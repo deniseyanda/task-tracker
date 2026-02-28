@@ -1,11 +1,13 @@
 import { and, desc, eq, gte, inArray, like, lte, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
+  InsertInvite,
   InsertProject,
   InsertSubtask,
   InsertTag,
   InsertTask,
   InsertUser,
+  invites,
   projects,
   subtasks,
   tags,
@@ -484,4 +486,107 @@ export async function getWeeklyReportData(userId: number) {
     createdCount: Number(created[0]?.count ?? 0),
     pendingCount: Number(pending[0]?.count ?? 0),
   };
+}
+
+// ─── Collaborators ────────────────────────────────────────────────────────────
+
+type CollabRole = "administrador" | "diretor" | "supervisor" | "operador";
+
+/** List all collaborators that belong to this owner's workspace */
+export async function listCollaborators(ownerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+      loginMethod: users.loginMethod,
+      lastSignedIn: users.lastSignedIn,
+      createdAt: users.createdAt,
+    })
+    .from(users)
+    .where(eq(users.ownerId, ownerId))
+    .orderBy(users.name);
+}
+
+/** Update a collaborator's role */
+export async function updateCollaboratorRole(
+  collaboratorId: number,
+  ownerId: number,
+  role: CollabRole
+) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db
+    .update(users)
+    .set({ role })
+    .where(and(eq(users.id, collaboratorId), eq(users.ownerId, ownerId)));
+}
+
+/** Remove a collaborator from the workspace */
+export async function removeCollaborator(collaboratorId: number, ownerId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  // Nullify their tasks' userId so data isn't lost
+  await db
+    .update(tasks)
+    .set({ assignee: null })
+    .where(eq(tasks.userId, collaboratorId));
+  await db
+    .delete(users)
+    .where(and(eq(users.id, collaboratorId), eq(users.ownerId, ownerId)));
+}
+
+// ─── Invites ──────────────────────────────────────────────────────────────────
+
+/** Create an invite token */
+export async function createInvite(data: InsertInvite) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  const [result] = await db.insert(invites).values(data);
+  return { id: (result as any).insertId as number };
+}
+
+/** Get invite by token */
+export async function getInviteByToken(token: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db
+    .select()
+    .from(invites)
+    .where(eq(invites.token, token))
+    .limit(1);
+  return result[0];
+}
+
+/** Mark invite as used */
+export async function useInvite(token: string, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db
+    .update(invites)
+    .set({ usedAt: new Date(), usedByUserId: userId })
+    .where(eq(invites.token, token));
+}
+
+/** List all invites created by owner */
+export async function listInvites(ownerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(invites)
+    .where(eq(invites.ownerId, ownerId))
+    .orderBy(desc(invites.createdAt));
+}
+
+/** Delete an invite */
+export async function deleteInvite(id: number, ownerId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db
+    .delete(invites)
+    .where(and(eq(invites.id, id), eq(invites.ownerId, ownerId)));
 }

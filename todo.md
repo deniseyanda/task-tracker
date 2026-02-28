@@ -50,3 +50,16 @@
 - [x] Frontend: card de cliente nas tarefas do Kanban com link direto
 - [x] Frontend: busca rápida de clientes e documentos
 - [x] Sidebar: adicionar item "Clientes" na navegação
+
+## Sistema de Colaboradores
+- [x] Schema: ampliar enum de roles (administrador, diretor, supervisor, operador)
+- [x] Schema: tabela de convites (invites) com token, email, role e expiração
+- [x] Backend: listar colaboradores com filtro por role
+- [x] Backend: convidar colaborador por link/email com role definida
+- [x] Backend: alterar role de colaborador
+- [x] Backend: remover colaborador
+- [x] Backend: permissões por nível em todos os routers
+- [x] Frontend: página Colaboradores (lista, convite, edição, remoção)
+- [x] Frontend: badge de role nos cards e perfis
+- [x] Frontend: restrições visuais por nível de acesso
+- [x] Sidebar: adicionar item "Colaboradores" na navegação

@@ -1,4 +1,5 @@
 import { TRPCError } from "@trpc/server";
+import { collaboratorsRouter } from "./routers/collaborators";
 import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { calendarRouter } from "./routers/calendar";
@@ -419,6 +420,7 @@ export const appRouter = router({
   notifications: notificationsRouter,
   calendar: calendarRouter,
   drive: driveRouter,
+  collaborators: collaboratorsRouter,
 });
 
 export type AppRouter = typeof appRouter;

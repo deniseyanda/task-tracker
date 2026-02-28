@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { BarChart3, Bot, FolderOpen, LayoutDashboard, LogOut, PanelLeft, Tag, Trello, Users } from "lucide-react";
+import { BarChart3, Bot, FolderOpen, LayoutDashboard, LogOut, PanelLeft, Tag, Trello, UserCog, Users } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
@@ -35,6 +35,7 @@ const menuItems = [
   { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
   { icon: Bot, label: "Assistente IA", path: "/assistente" },
   { icon: Users, label: "Clientes", path: "/clientes" },
+  { icon: UserCog, label: "Colaboradores", path: "/colaboradores" },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";

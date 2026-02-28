@@ -11,6 +11,8 @@ import Tags from "./pages/Tags";
 import Reports from "./pages/Reports";
 import Assistant from "./pages/Assistant";
 import Clients from "./pages/Clients";
+import Collaborators from "./pages/Collaborators";
+import JoinWorkspace from "./pages/JoinWorkspace";
 
 function Router() {
   return (
@@ -22,6 +24,8 @@ function Router() {
       <Route path="/relatorios" component={Reports} />
       <Route path="/assistente" component={Assistant} />
       <Route path="/clientes" component={Clients} />
+      <Route path="/colaboradores" component={Collaborators} />
+      <Route path="/entrar" component={JoinWorkspace} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>

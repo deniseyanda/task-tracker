@@ -315,3 +315,64 @@ describe("drive", () => {
     expect(typeof result.url).toBe("string");
   });
 });
+
+// ─── Collaborators Tests ──────────────────────────────────────────────────────
+
+describe("collaborators", () => {
+  it("myPermissions returns correct level for admin", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const perms = await caller.collaborators.myPermissions();
+    expect(perms.role).toBe("user");
+    expect(perms.canManageCollaborators).toBe(false);
+  });
+
+  it("list throws FORBIDDEN for non-diretor", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    await expect(caller.collaborators.list()).rejects.toThrow();
+  });
+
+  it("createInvite throws FORBIDDEN for non-admin", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    await expect(
+      caller.collaborators.createInvite({
+        role: "operador",
+        origin: "https://example.com",
+      })
+    ).rejects.toThrow();
+  });
+
+  it("updateRole throws FORBIDDEN for non-admin", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    await expect(
+      caller.collaborators.updateRole({ collaboratorId: 99, role: "supervisor" })
+    ).rejects.toThrow();
+  });
+
+  it("remove throws FORBIDDEN for non-admin", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    await expect(
+      caller.collaborators.remove({ collaboratorId: 99 })
+    ).rejects.toThrow();
+  });
+
+  it("acceptInvite throws NOT_FOUND for invalid token", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    await expect(
+      caller.collaborators.acceptInvite({ token: "invalid-token-xyz" })
+    ).rejects.toThrow();
+  });
+
+  it("getInviteInfo throws NOT_FOUND for invalid token", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    await expect(
+      caller.collaborators.getInviteInfo({ token: "invalid-token-xyz" })
+    ).rejects.toThrow();
+  });
+});

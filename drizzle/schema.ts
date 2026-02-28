@@ -14,7 +14,10 @@ export const users = mysqlTable("users", {
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  // Roles: admin (sistema), administrador, diretor, supervisor, operador
+  role: mysqlEnum("role", ["user", "admin", "administrador", "diretor", "supervisor", "operador"]).default("user").notNull(),
+  // Owner reference: userId of the workspace owner (for multi-tenant isolation)
+  ownerId: int("ownerId"), // null = is the owner themselves
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
@@ -98,3 +101,20 @@ export const subtasks = mysqlTable("subtasks", {
 
 export type Subtask = typeof subtasks.$inferSelect;
 export type InsertSubtask = typeof subtasks.$inferInsert;
+
+// Collaborator Invites
+export const invites = mysqlTable("invites", {
+  id: int("id").autoincrement().primaryKey(),
+  ownerId: int("ownerId").notNull(), // who sent the invite
+  token: varchar("token", { length: 128 }).notNull().unique(),
+  email: varchar("email", { length: 320 }),
+  role: mysqlEnum("role", ["administrador", "diretor", "supervisor", "operador"]).notNull(),
+  name: varchar("name", { length: 255 }), // optional display name
+  usedAt: timestamp("usedAt"), // null = not yet used
+  usedByUserId: int("usedByUserId"),
+  expiresAt: timestamp("expiresAt").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Invite = typeof invites.$inferSelect;
+export type InsertInvite = typeof invites.$inferInsert;
