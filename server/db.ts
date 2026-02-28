@@ -339,9 +339,12 @@ export async function getDashboardStats(userId: number) {
     );
 
   // Daily completions last 7 days
-  const dailyCompletions = await db
+  // Use FROM_UNIXTIME with milliseconds divided by 1000, wrapped in try/catch
+  let dailyCompletions: { day: string; count: number }[] = [];
+  try {
+  dailyCompletions = await db
     .select({
-      day: sql<string>`DATE(FROM_UNIXTIME(${tasks.completedAt}/1000))`,
+      day: sql<string>`DATE(FROM_UNIXTIME(CAST(${tasks.completedAt} AS UNSIGNED)/1000))`,
       count: sql<number>`count(*)`,
     })
     .from(tasks)
@@ -352,7 +355,27 @@ export async function getDashboardStats(userId: number) {
         sql`${tasks.completedAt} >= ${weekAgo}`
       )
     )
-    .groupBy(sql`DATE(FROM_UNIXTIME(${tasks.completedAt}/1000))`);
+    .groupBy(sql`DATE(FROM_UNIXTIME(CAST(${tasks.completedAt} AS UNSIGNED)/1000))`);
+  } catch (e) {
+    // Fallback: compute daily completions in JS if SQL function unavailable
+    const raw = await db
+      .select({ completedAt: tasks.completedAt })
+      .from(tasks)
+      .where(
+        and(
+          eq(tasks.userId, userId),
+          eq(tasks.status, "concluido"),
+          sql`${tasks.completedAt} >= ${weekAgo}`
+        )
+      );
+    const countMap: Record<string, number> = {};
+    for (const row of raw) {
+      if (!row.completedAt) continue;
+      const day = new Date(Number(row.completedAt)).toISOString().split("T")[0];
+      countMap[day] = (countMap[day] ?? 0) + 1;
+    }
+    dailyCompletions = Object.entries(countMap).map(([day, count]) => ({ day, count }));
+  }
 
   return {
     statusCounts,
