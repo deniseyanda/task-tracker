@@ -750,3 +750,12 @@ export async function runNotificationJob(userId: number) {
 
   return { deadlineCount: dueSoon.length, overdueCount: overdue.length };
 }
+
+// ─── Daily Job Helper ─────────────────────────────────────────────────────────
+/** Returns all user IDs in the system — used by the daily notification job */
+export async function getAllUserIds(): Promise<number[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db.select({ id: users.id }).from(users);
+  return rows.map((r) => r.id);
+}

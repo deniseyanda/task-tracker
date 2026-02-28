@@ -79,3 +79,8 @@
 - [x] Frontend: painel dropdown de notificações com lista, ações e link para tarefa
 - [x] Frontend: polling automático a cada 60s para atualizar contagem
 - [x] Frontend: marcar como lida ao clicar, marcar todas como lidas
+
+## Agendamento Diário
+- [x] Job diário às 8h: verificar prazos e gerar notificações para todos os usuários
+- [x] Lógica de fuso horário (America/Sao_Paulo)
+- [x] Log de execução do job no servidor
