@@ -590,3 +590,15 @@ export async function deleteInvite(id: number, ownerId: number) {
     .delete(invites)
     .where(and(eq(invites.id, id), eq(invites.ownerId, ownerId)));
 }
+
+/** Get unique assignee names from tasks of a user */
+export async function getUniqueAssignees(userId: number): Promise<string[]> {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .selectDistinct({ assignee: tasks.assignee })
+    .from(tasks)
+    .where(and(eq(tasks.userId, userId), sql`${tasks.assignee} IS NOT NULL AND ${tasks.assignee} != ''`))
+    .orderBy(tasks.assignee);
+  return rows.map((r) => r.assignee).filter(Boolean) as string[];
+}

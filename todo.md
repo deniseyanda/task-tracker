@@ -66,3 +66,4 @@
 
 ## Correções
 - [x] Corrigir erro NotFoundError na página Colaboradores (confirm() nativo + renderização React)
+- [x] Kanban: filtro por colaborador/responsável na barra de filtros

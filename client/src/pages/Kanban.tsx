@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { AlertTriangle, Calendar, CalendarCheck, Clock, ExternalLink, FolderOpen, GripVertical, Loader2, Plus, Search, Tag, Trash2, X } from "lucide-react";
+import { AlertTriangle, Calendar, CalendarCheck, Clock, ExternalLink, FolderOpen, GripVertical, Loader2, Plus, Search, Tag, Trash2, User, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -49,6 +49,7 @@ export default function Kanban() {
   const [search, setSearch] = useState("");
   const [filterProject, setFilterProject] = useState<string>("all");
   const [filterPriority, setFilterPriority] = useState<string>("all");
+  const [filterAssignee, setFilterAssignee] = useState<string>("all");
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [createStatus, setCreateStatus] = useState<Status>("backlog");
@@ -59,9 +60,14 @@ export default function Kanban() {
     search: search || undefined,
     projectId: filterProject !== "all" ? parseInt(filterProject) : undefined,
     priority: filterPriority !== "all" ? (filterPriority as Priority) : undefined,
+    assignee: filterAssignee !== "all" ? filterAssignee : undefined,
   });
 
   const { data: projects = [] } = trpc.projects.list.useQuery();
+  const { data: assignees = [] } = trpc.tasks.assignees.useQuery();
+
+  const hasActiveFilters = filterAssignee !== "all" || filterPriority !== "all" || filterProject !== "all" || !!search;
+  const clearFilters = () => { setFilterAssignee("all"); setFilterPriority("all"); setFilterProject("all"); setSearch(""); };
 
   const updateStatus = trpc.tasks.updateStatus.useMutation({
     onMutate: async ({ id, status }) => {
@@ -158,6 +164,37 @@ export default function Kanban() {
                   <SelectItem value="baixa">Baixa</SelectItem>
                 </SelectContent>
               </Select>
+              {/* Assignee filter */}
+              <Select value={filterAssignee} onValueChange={setFilterAssignee}>
+                <SelectTrigger className="h-9 text-sm w-40 border-black">
+                  <div className="flex items-center gap-1.5 overflow-hidden">
+                    <User className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                    <span className="truncate text-sm">
+                      {filterAssignee === "all" ? "Responsável" : filterAssignee}
+                    </span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos responsáveis</SelectItem>
+                  {assignees.map((a) => (
+                    <SelectItem key={a} value={a}>{a}</SelectItem>
+                  ))}
+                  {assignees.length === 0 && (
+                    <div className="px-3 py-2 text-xs text-gray-400">Nenhum responsável cadastrado</div>
+                  )}
+                </SelectContent>
+              </Select>
+              {/* Clear filters */}
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="h-9 px-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide border border-[oklch(0.45_0.22_27)] text-[oklch(0.45_0.22_27)] hover:bg-[oklch(0.45_0.22_27)] hover:text-white transition-colors"
+                  title="Limpar todos os filtros"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Limpar
+                </button>
+              )}
               <Button
                 onClick={() => { setCreateStatus("backlog"); setIsCreating(true); }}
                 className="h-9 bg-black text-white hover:bg-[oklch(0.45_0.22_27)] text-xs font-bold uppercase tracking-wide"
@@ -218,11 +255,7 @@ export default function Kanban() {
                           isDragging={draggingId === task.id}
                           isOverdue={!!isOverdue(task as Task)}
                           onEdit={() => setEditingTask(task as Task)}
-                          onDelete={() => {
-                            if (confirm("Excluir esta tarefa?")) {
-                              deleteTask.mutate({ id: task.id });
-                            }
-                          }}
+                          onDelete={() => deleteTask.mutate({ id: task.id })}
                           onDragStart={(e) => handleDragStart(e, task.id)}
                           onDragEnd={() => setDraggingId(null)}
                         />

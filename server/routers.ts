@@ -13,7 +13,7 @@ import {
   createProject, createSubtask, createTag, createTask,
   deleteProject, deleteSubtask, deleteTag, deleteTask,
   getDashboardStats, getOverdueTasks, getTask, getTasksDueSoon,
-  getWeeklyReportData, listProjects, listTags, listTasks,
+  getUniqueAssignees, getWeeklyReportData, listProjects, listTags, listTasks,
   markNotifiedDeadline, markNotifiedOverdue,
   updateProject, updateSubtask, updateTask,
 } from "./db";
@@ -84,6 +84,8 @@ const tasksRouter = router({
       status: statusEnum.optional(),
     }).optional())
     .query(({ ctx, input }) => listTasks(ctx.user.id, input ?? {})),
+  assignees: protectedProcedure
+    .query(({ ctx }) => getUniqueAssignees(ctx.user.id)),
 
   get: protectedProcedure
     .input(z.object({ id: z.number() }))
