@@ -63,3 +63,6 @@
 - [x] Frontend: badge de role nos cards e perfis
 - [x] Frontend: restrições visuais por nível de acesso
 - [x] Sidebar: adicionar item "Colaboradores" na navegação
+
+## Correções
+- [x] Corrigir erro NotFoundError na página Colaboradores (confirm() nativo + renderização React)

@@ -1,4 +1,14 @@
 import DashboardLayout from "@/components/DashboardLayout";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -37,34 +47,30 @@ type CollabRole = "administrador" | "diretor" | "supervisor" | "operador";
 
 const ROLE_CONFIG: Record<
   CollabRole,
-  { label: string; color: string; bg: string; icon: React.ReactNode; description: string }
+  { label: string; bg: string; icon: React.ReactNode; description: string }
 > = {
   administrador: {
     label: "Administrador",
-    color: "text-[oklch(0.45_0.22_27)]",
     bg: "bg-[oklch(0.45_0.22_27)]",
-    icon: <Crown className="h-3.5 w-3.5" />,
+    icon: <Crown className="h-3 w-3" />,
     description: "Acesso total, exceto convidar colaboradores",
   },
   diretor: {
     label: "Diretor",
-    color: "text-black",
     bg: "bg-black",
-    icon: <ShieldCheck className="h-3.5 w-3.5" />,
+    icon: <ShieldCheck className="h-3 w-3" />,
     description: "Ver tudo, editar tudo, excluir tarefas e gerenciar projetos",
   },
   supervisor: {
     label: "Supervisor",
-    color: "text-gray-700",
     bg: "bg-gray-700",
-    icon: <UserCheck className="h-3.5 w-3.5" />,
+    icon: <UserCheck className="h-3 w-3" />,
     description: "Ver tudo, editar tudo, gerenciar tags e relatórios",
   },
   operador: {
     label: "Operador",
-    color: "text-gray-500",
     bg: "bg-gray-400",
-    icon: <Users className="h-3.5 w-3.5" />,
+    icon: <Users className="h-3 w-3" />,
     description: "Criar e editar apenas suas próprias tarefas",
   },
 };
@@ -89,10 +95,11 @@ export default function Collaborators() {
   const [editRole, setEditRole] = useState<CollabRole>("operador");
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<{ id: number; name: string } | null>(null);
 
   const { data: perms } = trpc.collaborators.myPermissions.useQuery();
   const { data: collaborators = [], isLoading } = trpc.collaborators.list.useQuery(undefined, {
-    enabled: !!perms?.canManageCollaborators || (perms?.level ?? 0) >= 3,
+    enabled: (perms?.level ?? 0) >= 3,
   });
   const { data: invitesList = [] } = trpc.collaborators.listInvites.useQuery(undefined, {
     enabled: !!perms?.canManageCollaborators,
@@ -110,6 +117,7 @@ export default function Collaborators() {
   const remove = trpc.collaborators.remove.useMutation({
     onSuccess: () => {
       utils.collaborators.list.invalidate();
+      setRemoveTarget(null);
       toast.success("Colaborador removido");
     },
     onError: (e) => toast.error(e.message),
@@ -141,7 +149,7 @@ export default function Collaborators() {
   }
 
   const canManage = perms.canManageCollaborators;
-  const canView = (perms.level ?? 0) >= 3; // diretor+
+  const canView = (perms.level ?? 0) >= 3;
 
   if (!canView) {
     return (
@@ -185,14 +193,16 @@ export default function Collaborators() {
         <div className="mb-8">
           <p className="text-xs font-black uppercase tracking-widest mb-3">Níveis de Acesso</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {(Object.entries(ROLE_CONFIG) as [CollabRole, typeof ROLE_CONFIG[CollabRole]][]).map(([role, cfg]) => (
-              <div key={role} className="border border-black p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className={`${cfg.color} font-black text-sm`}>{cfg.label}</span>
+            {(Object.entries(ROLE_CONFIG) as [CollabRole, typeof ROLE_CONFIG[CollabRole]][]).map(
+              ([role, cfg]) => (
+                <div key={role} className="border border-black p-4">
+                  <div className="mb-2">
+                    <RoleBadge role={role} />
+                  </div>
+                  <p className="text-xs text-gray-500 leading-relaxed">{cfg.description}</p>
                 </div>
-                <p className="text-xs text-gray-500 leading-relaxed">{cfg.description}</p>
-              </div>
-            ))}
+              )
+            )}
           </div>
         </div>
 
@@ -215,7 +225,6 @@ export default function Collaborators() {
             </div>
           ) : (
             <div className="border border-black">
-              {/* Header */}
               <div className="grid grid-cols-12 px-4 py-2 bg-black text-white text-[10px] font-bold uppercase tracking-widest">
                 <div className="col-span-4">Nome</div>
                 <div className="col-span-3">Email</div>
@@ -292,16 +301,14 @@ export default function Collaborators() {
                             setEditRole((collab.role as CollabRole) ?? "operador");
                           }}
                           className="p-1.5 hover:bg-gray-100 text-gray-400 hover:text-black transition-colors"
-                          title="Alterar role"
+                          title="Alterar nível"
                         >
                           <ShieldCheck className="h-3.5 w-3.5" />
                         </button>
                         <button
-                          onClick={() => {
-                            if (confirm(`Remover ${collab.name ?? "colaborador"}?`)) {
-                              remove.mutate({ collaboratorId: collab.id });
-                            }
-                          }}
+                          onClick={() =>
+                            setRemoveTarget({ id: collab.id, name: collab.name ?? "colaborador" })
+                          }
                           className="p-1.5 hover:bg-gray-100 text-gray-400 hover:text-[oklch(0.45_0.22_27)] transition-colors"
                           title="Remover"
                         >
@@ -317,7 +324,7 @@ export default function Collaborators() {
         </div>
 
         {/* Pending invites */}
-        {canManage && invitesList.length > 0 && (
+        {canManage && invitesList.filter((i) => !i.usedAt).length > 0 && (
           <div>
             <p className="text-xs font-black uppercase tracking-widest mb-3 border-b border-black pb-2">
               Convites Pendentes ({invitesList.filter((i) => !i.usedAt).length})
@@ -337,7 +344,7 @@ export default function Collaborators() {
                       <div className="flex items-center gap-3 min-w-0">
                         <Link2 className="h-4 w-4 text-gray-400 shrink-0" />
                         <div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <RoleBadge role={invite.role} />
                             {invite.name && (
                               <span className="text-xs text-gray-500">para {invite.name}</span>
@@ -370,43 +377,81 @@ export default function Collaborators() {
       </div>
 
       {/* Invite Modal */}
-      {showInviteModal && (
-        <InviteModal
-          onClose={() => { setShowInviteModal(false); setInviteLink(null); }}
-          onCreated={(link) => setInviteLink(link)}
-          inviteLink={inviteLink}
-          copied={copied}
-          onCopy={handleCopyLink}
-        />
-      )}
+      <Dialog
+        open={showInviteModal}
+        onOpenChange={(v) => {
+          if (!v) { setShowInviteModal(false); setInviteLink(null); }
+        }}
+      >
+        <DialogContent className="max-w-md border-2 border-black p-0">
+          <div className="h-1.5 w-full bg-[oklch(0.45_0.22_27)]" />
+          <div className="p-6">
+            <DialogHeader className="mb-6">
+              <DialogTitle className="text-2xl font-black tracking-tight">
+                Convidar Colaborador
+              </DialogTitle>
+            </DialogHeader>
+            <InviteForm
+              inviteLink={inviteLink}
+              copied={copied}
+              onCreated={(link) => {
+                setInviteLink(link);
+                utils.collaborators.listInvites.invalidate();
+              }}
+              onCopy={handleCopyLink}
+              onClose={() => { setShowInviteModal(false); setInviteLink(null); }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Remove confirmation dialog */}
+      <AlertDialog open={!!removeTarget} onOpenChange={(v) => { if (!v) setRemoveTarget(null); }}>
+        <AlertDialogContent className="border-2 border-black">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-black text-xl">Remover Colaborador</AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-gray-600">
+              Tem certeza que deseja remover{" "}
+              <strong>{removeTarget?.name}</strong> do workspace? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-black text-sm">Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => removeTarget && remove.mutate({ collaboratorId: removeTarget.id })}
+              disabled={remove.isPending}
+              className="bg-[oklch(0.45_0.22_27)] text-white hover:bg-red-700 text-sm font-bold"
+            >
+              {remove.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Remover"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 }
 
-// ─── Invite Modal ─────────────────────────────────────────────────────────────
+// ─── Invite Form (extracted to avoid hook-in-conditional issues) ──────────────
 
-function InviteModal({
-  onClose,
-  onCreated,
+function InviteForm({
   inviteLink,
   copied,
+  onCreated,
   onCopy,
+  onClose,
 }: {
-  onClose: () => void;
-  onCreated: (link: string) => void;
   inviteLink: string | null;
   copied: boolean;
+  onCreated: (link: string) => void;
   onCopy: () => void;
+  onClose: () => void;
 }) {
   const [role, setRole] = useState<CollabRole>("operador");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
   const createInvite = trpc.collaborators.createInvite.useMutation({
-    onSuccess: (data) => {
-      onCreated(data.inviteUrl);
-      trpc.useUtils().collaborators.listInvites.invalidate();
-    },
+    onSuccess: (data) => onCreated(data.inviteUrl),
     onError: (e) => toast.error(e.message),
   });
 
@@ -414,149 +459,112 @@ function InviteModal({
     e.preventDefault();
     createInvite.mutate({
       role,
-      name: name || undefined,
-      email: email || undefined,
+      name: name.trim() || undefined,
+      email: email.trim() || undefined,
       origin: window.location.origin,
     });
   };
 
-  return (
-    <Dialog open onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md border-2 border-black p-0">
-        <div className="h-1.5 w-full bg-[oklch(0.45_0.22_27)]" />
-        <div className="p-6">
-          <DialogHeader className="mb-6">
-            <DialogTitle className="text-2xl font-black tracking-tight">
-              Convidar Colaborador
-            </DialogTitle>
-          </DialogHeader>
-
-          {!inviteLink ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">
-                  Nível de Acesso *
-                </Label>
-                <Select value={role} onValueChange={(v) => setRole(v as CollabRole)}>
-                  <SelectTrigger className="border-black">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="administrador">Administrador</SelectItem>
-                    <SelectItem value="diretor">Diretor</SelectItem>
-                    <SelectItem value="supervisor">Supervisor</SelectItem>
-                    <SelectItem value="operador">Operador</SelectItem>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-gray-400 mt-1">
-                  {ROLE_CONFIG[role].description}
-                </p>
-              </div>
-
-              <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">
-                  Nome (opcional)
-                </Label>
-                <Input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Nome do colaborador"
-                  className="border-black text-sm"
-                />
-              </div>
-
-              <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">
-                  Email (opcional)
-                </Label>
-                <Input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="email@exemplo.com"
-                  className="border-black text-sm"
-                />
-              </div>
-
-              <div className="border border-gray-200 p-3 bg-gray-50">
-                <p className="text-xs text-gray-500 leading-relaxed">
-                  Será gerado um link de convite válido por <strong>7 dias</strong>. O colaborador deve acessar o link e fazer login para entrar no workspace.
-                </p>
-              </div>
-
-              <div className="flex gap-2 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onClose}
-                  className="border-black flex-1"
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={createInvite.isPending}
-                  className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] flex-1 font-bold uppercase tracking-wide text-xs"
-                >
-                  {createInvite.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Link2 className="h-4 w-4 mr-2" />
-                      Gerar Link
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 bg-green-100 flex items-center justify-center">
-                  <Check className="h-4 w-4 text-green-600" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold">Link gerado com sucesso!</p>
-                  <p className="text-xs text-gray-400">Válido por 7 dias</p>
-                </div>
-              </div>
-
-              <div className="border border-black p-3 bg-gray-50">
-                <p className="text-xs text-gray-500 break-all font-mono">{inviteLink}</p>
-              </div>
-
-              <Button
-                onClick={onCopy}
-                className={`w-full font-bold uppercase tracking-wide text-xs ${
-                  copied
-                    ? "bg-green-600 text-white"
-                    : "bg-black text-white hover:bg-[oklch(0.45_0.22_27)]"
-                }`}
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4 mr-2" />
-                    Copiado!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copiar Link
-                  </>
-                )}
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={onClose}
-                className="w-full border-black text-xs"
-              >
-                Fechar
-              </Button>
-            </div>
-          )}
+  if (inviteLink) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 bg-green-100 flex items-center justify-center shrink-0">
+            <Check className="h-4 w-4 text-green-600" />
+          </div>
+          <div>
+            <p className="text-sm font-bold">Link gerado com sucesso!</p>
+            <p className="text-xs text-gray-400">Válido por 7 dias</p>
+          </div>
         </div>
-      </DialogContent>
-    </Dialog>
+        <div className="border border-black p-3 bg-gray-50">
+          <p className="text-xs text-gray-500 break-all font-mono leading-relaxed">{inviteLink}</p>
+        </div>
+        <Button
+          onClick={onCopy}
+          className={`w-full font-bold uppercase tracking-wide text-xs ${
+            copied
+              ? "bg-green-600 text-white hover:bg-green-700"
+              : "bg-black text-white hover:bg-[oklch(0.45_0.22_27)]"
+          }`}
+        >
+          {copied ? (
+            <><Check className="h-4 w-4 mr-2" />Copiado!</>
+          ) : (
+            <><Copy className="h-4 w-4 mr-2" />Copiar Link</>
+          )}
+        </Button>
+        <Button variant="outline" onClick={onClose} className="w-full border-black text-xs">
+          Fechar
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">
+          Nível de Acesso *
+        </Label>
+        <Select value={role} onValueChange={(v) => setRole(v as CollabRole)}>
+          <SelectTrigger className="border-black">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="administrador">Administrador</SelectItem>
+            <SelectItem value="diretor">Diretor</SelectItem>
+            <SelectItem value="supervisor">Supervisor</SelectItem>
+            <SelectItem value="operador">Operador</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-gray-400 mt-1">{ROLE_CONFIG[role].description}</p>
+      </div>
+      <div>
+        <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">
+          Nome (opcional)
+        </Label>
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Nome do colaborador"
+          className="border-black text-sm"
+        />
+      </div>
+      <div>
+        <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">
+          Email (opcional)
+        </Label>
+        <Input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="email@exemplo.com"
+          className="border-black text-sm"
+        />
+      </div>
+      <div className="border border-gray-200 p-3 bg-gray-50">
+        <p className="text-xs text-gray-500 leading-relaxed">
+          Será gerado um link de convite válido por <strong>7 dias</strong>. O colaborador deve
+          acessar o link e fazer login para entrar no workspace.
+        </p>
+      </div>
+      <div className="flex gap-2 pt-2">
+        <Button type="button" variant="outline" onClick={onClose} className="border-black flex-1">
+          Cancelar
+        </Button>
+        <Button
+          type="submit"
+          disabled={createInvite.isPending}
+          className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] flex-1 font-bold uppercase tracking-wide text-xs"
+        >
+          {createInvite.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <><Link2 className="h-4 w-4 mr-2" />Gerar Link</>
+          )}
+        </Button>
+      </div>
+    </form>
   );
 }
