@@ -358,12 +358,12 @@ const aiRouter = router({
 });
 
 // ─── Notifications Router ─────────────────────────────────────────────────────
-
+import { notificationsRouter as _notifBase } from "./routers/notifications";
 const notificationsRouter = router({
+  ..._notifBase._def.procedures,
   checkAndNotify: protectedProcedure.mutation(async ({ ctx }) => {
     const dueSoon = await getTasksDueSoon(ctx.user.id);
     const overdue = await getOverdueTasks(ctx.user.id);
-
     for (const task of dueSoon) {
       await notifyOwner({
         title: `⏰ Tarefa vencendo em 24h: ${task.title}`,
@@ -371,7 +371,6 @@ const notificationsRouter = router({
       });
       await markNotifiedDeadline(task.id);
     }
-
     for (const task of overdue) {
       await notifyOwner({
         title: `🚨 Tarefa atrasada: ${task.title}`,
@@ -379,24 +378,19 @@ const notificationsRouter = router({
       });
       await markNotifiedOverdue(task.id);
     }
-
     return { notified: dueSoon.length + overdue.length };
   }),
-
   weeklyReport: protectedProcedure.mutation(async ({ ctx }) => {
     const data = await getWeeklyReportData(ctx.user.id);
     if (!data) return { sent: false };
-
     const completedTitles = data.completed
       .slice(0, 10)
       .map((t) => `• ${t.title}`)
       .join("\n");
-
     await notifyOwner({
       title: `📊 Relatório Semanal de Produtividade`,
       content: `Resumo da semana:\n\n✅ Tarefas concluídas: ${data.completedCount}\n📝 Tarefas criadas: ${data.createdCount}\n⏳ Tarefas pendentes: ${data.pendingCount}\n\nConcluídas esta semana:\n${completedTitles || "Nenhuma"}`,
     });
-
     return { sent: true };
   }),
 });

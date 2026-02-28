@@ -25,6 +25,7 @@ import { BarChart3, Bot, FolderOpen, LayoutDashboard, LogOut, PanelLeft, Tag, Tr
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
+import NotificationBell from "./NotificationBell";
 import { Button } from "./ui/button";
 
 const menuItems = [
@@ -226,19 +227,23 @@ function DashboardLayoutContent({
       </div>
 
       <SidebarInset>
-        {isMobile && (
-          <div className="flex border-b h-14 items-center justify-between bg-white px-4 sticky top-0 z-40">
-            <div className="flex items-center gap-3">
-              <SidebarTrigger className="h-8 w-8" />
+        {/* Top bar with notification bell — always visible */}
+        <div className="flex border-b h-14 items-center justify-between bg-white px-4 sticky top-0 z-40 border-gray-100">
+          <div className="flex items-center gap-3">
+            {isMobile && <SidebarTrigger className="h-8 w-8" />}
+            {isMobile && (
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-[oklch(0.45_0.22_27)]" />
                 <span className="font-bold text-sm tracking-tight uppercase">
                   {activeMenuItem?.label ?? "Menu"}
                 </span>
               </div>
-            </div>
+            )}
           </div>
-        )}
+          <div className="flex items-center gap-2 ml-auto">
+            <NotificationBell />
+          </div>
+        </div>
         <main className="flex-1 min-h-screen bg-white">{children}</main>
       </SidebarInset>
     </>

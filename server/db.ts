@@ -2,12 +2,14 @@ import { and, desc, eq, gte, inArray, like, lte, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import {
   InsertInvite,
+  InsertNotification,
   InsertProject,
   InsertSubtask,
   InsertTag,
   InsertTask,
   InsertUser,
   invites,
+  notifications,
   projects,
   subtasks,
   tags,
@@ -601,4 +603,150 @@ export async function getUniqueAssignees(userId: number): Promise<string[]> {
     .where(and(eq(tasks.userId, userId), sql`${tasks.assignee} IS NOT NULL AND ${tasks.assignee} != ''`))
     .orderBy(tasks.assignee);
   return rows.map((r) => r.assignee).filter(Boolean) as string[];
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+
+/** Create a notification for a user */
+export async function createNotification(data: InsertNotification) {
+  const db = await getDb();
+  if (!db) return;
+  await db.insert(notifications).values(data);
+}
+
+/** List notifications for a user (newest first, max 50) */
+export async function listNotifications(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(notifications)
+    .where(eq(notifications.userId, userId))
+    .orderBy(desc(notifications.createdAt))
+    .limit(50);
+}
+
+/** Count unread notifications for a user */
+export async function countUnreadNotifications(userId: number): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const rows = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(notifications)
+    .where(and(eq(notifications.userId, userId), eq(notifications.read, "0")));
+  return Number(rows[0]?.count ?? 0);
+}
+
+/** Mark a single notification as read */
+export async function markNotificationRead(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(notifications)
+    .set({ read: "1" })
+    .where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
+}
+
+/** Mark all notifications as read for a user */
+export async function markAllNotificationsRead(userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .update(notifications)
+    .set({ read: "1" })
+    .where(eq(notifications.userId, userId));
+}
+
+/** Delete a notification */
+export async function deleteNotification(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .delete(notifications)
+    .where(and(eq(notifications.id, id), eq(notifications.userId, userId)));
+}
+
+/** Delete all read notifications for a user */
+export async function clearReadNotifications(userId: number) {
+  const db = await getDb();
+  if (!db) return;
+  await db
+    .delete(notifications)
+    .where(and(eq(notifications.userId, userId), eq(notifications.read, "1")));
+}
+
+/**
+ * Check tasks with deadline in the next 24h and create "prazo_proximo" notifications.
+ * Also check overdue tasks and create "atrasada" notifications.
+ * Avoids duplicates by checking notifiedDeadline / notifiedOverdue flags on tasks.
+ */
+export async function runNotificationJob(userId: number) {
+  const db = await getDb();
+  if (!db) return { deadlineCount: 0, overdueCount: 0 };
+
+  const now = Date.now();
+  const in24h = now + 24 * 60 * 60 * 1000;
+
+  // Tasks due in next 24h that haven't been notified yet
+  const dueSoon = await db
+    .select()
+    .from(tasks)
+    .where(
+      and(
+        eq(tasks.userId, userId),
+        sql`${tasks.status} != 'concluido'`,
+        sql`${tasks.deadline} IS NOT NULL`,
+        sql`${tasks.deadline} > ${now}`,
+        sql`${tasks.deadline} <= ${in24h}`,
+        sql`${tasks.notifiedDeadline} IS NULL`
+      )
+    );
+
+  for (const task of dueSoon) {
+    const hoursLeft = Math.round(((task.deadline ?? 0) - now) / (1000 * 60 * 60));
+    await createNotification({
+      userId,
+      taskId: task.id,
+      type: "prazo_proximo",
+      title: "Prazo se aproximando",
+      message: `"${task.title}" vence em ${hoursLeft}h. Não deixe para depois!`,
+      read: "0",
+    });
+    await db
+      .update(tasks)
+      .set({ notifiedDeadline: new Date() })
+      .where(eq(tasks.id, task.id));
+  }
+
+  // Overdue tasks that haven't been notified yet
+  const overdue = await db
+    .select()
+    .from(tasks)
+    .where(
+      and(
+        eq(tasks.userId, userId),
+        sql`${tasks.status} != 'concluido'`,
+        sql`${tasks.deadline} IS NOT NULL`,
+        sql`${tasks.deadline} < ${now}`,
+        sql`${tasks.notifiedOverdue} IS NULL`
+      )
+    );
+
+  for (const task of overdue) {
+    const daysLate = Math.round((now - (task.deadline ?? 0)) / (1000 * 60 * 60 * 24));
+    await createNotification({
+      userId,
+      taskId: task.id,
+      type: "atrasada",
+      title: "Tarefa atrasada",
+      message: `"${task.title}" está atrasada há ${daysLate > 0 ? daysLate + " dia(s)" : "algumas horas"}. Ação necessária!`,
+      read: "0",
+    });
+    await db
+      .update(tasks)
+      .set({ notifiedOverdue: new Date() })
+      .where(eq(tasks.id, task.id));
+  }
+
+  return { deadlineCount: dueSoon.length, overdueCount: overdue.length };
 }

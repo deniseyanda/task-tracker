@@ -118,3 +118,17 @@ export const invites = mysqlTable("invites", {
 
 export type Invite = typeof invites.$inferSelect;
 export type InsertInvite = typeof invites.$inferInsert;
+
+// In-app Notifications
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  taskId: int("taskId"), // nullable — some notifications may not be task-related
+  type: mysqlEnum("type", ["prazo_proximo", "atrasada", "concluida", "sistema"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  read: mysqlEnum("read", ["0", "1"]).default("0").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;

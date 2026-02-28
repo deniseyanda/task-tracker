@@ -67,3 +67,15 @@
 ## Correções
 - [x] Corrigir erro NotFoundError na página Colaboradores (confirm() nativo + renderização React)
 - [x] Kanban: filtro por colaborador/responsável na barra de filtros
+
+## Sistema de Notificações
+- [x] Schema: tabela notifications (id, userId, taskId, tipo, mensagem, lida, criadaEm)
+- [x] Backend: helper createNotification, listNotifications, markAsRead, markAllRead, deleteNotification
+- [x] Backend: router notifications (list, markRead, markAllRead, delete, unreadCount)
+- [x] Backend: job automático que verifica prazos a cada hora e cria notificações
+- [x] Backend: verificar tarefas vencendo em 24h (tipo: prazo_proximo)
+- [x] Backend: verificar tarefas atrasadas (tipo: atrasada)
+- [x] Frontend: sino com badge de não lidas no DashboardLayout
+- [x] Frontend: painel dropdown de notificações com lista, ações e link para tarefa
+- [x] Frontend: polling automático a cada 60s para atualizar contagem
+- [x] Frontend: marcar como lida ao clicar, marcar todas como lidas
