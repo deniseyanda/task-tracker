@@ -27,7 +27,15 @@ Crie um arquivo `.env` na raiz com as seguintes variáveis:
 
 ```env
 DATABASE_URL=mysql://user:password@localhost:3306/task_tracker
-JWT_SECRET=your_jwt_secret
+JWT_SECRET=
+OAUTH_SERVER_URL=
+VITE_APP_ID=
+OWNER_OPEN_ID=
+
+# APIs internas da plataforma (Google Maps, LLM, Storage, Imagem, Voz)
+BUILT_IN_FORGE_API_URL=
+BUILT_IN_FORGE_API_KEY=
+
 ```
 
 ## Comandos
