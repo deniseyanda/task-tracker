@@ -36,6 +36,13 @@
       "when": 1772299282233,
       "tag": "0004_happy_grey_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1772350000000,
+      "tag": "0005_add_password_hash",
+      "breakpoints": true
     }
   ]
 }
