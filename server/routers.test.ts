@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { appRouter } from "./routers";
 import { COOKIE_NAME } from "../shared/const";
 import type { TrpcContext } from "./_core/context";
+import * as db from "./db";
 
 // Mock DB module
 vi.mock("./db", () => ({
@@ -34,6 +35,15 @@ vi.mock("./db", () => ({
   getOverdueTasks: vi.fn().mockResolvedValue([]),
   markNotifiedDeadline: vi.fn().mockResolvedValue(undefined),
   markNotifiedOverdue: vi.fn().mockResolvedValue(undefined),
+  createNotification: vi.fn().mockResolvedValue(undefined),
+  listNotifications: vi.fn().mockResolvedValue([]),
+  countUnreadNotifications: vi.fn().mockResolvedValue(0),
+  markNotificationRead: vi.fn().mockResolvedValue(undefined),
+  markAllNotificationsRead: vi.fn().mockResolvedValue(undefined),
+  deleteNotification: vi.fn().mockResolvedValue(undefined),
+  clearReadNotifications: vi.fn().mockResolvedValue(undefined),
+  runNotificationJob: vi.fn().mockResolvedValue(undefined),
+  getUniqueAssignees: vi.fn().mockResolvedValue([]),
   listClients: vi.fn().mockResolvedValue([]),
   listClientFiles: vi.fn().mockResolvedValue([]),
   search: vi.fn().mockResolvedValue({ clients: [], files: [], total: 0 }),
@@ -313,6 +323,103 @@ describe("drive", () => {
     const result = await caller.drive.getShareLink({ fileId: "abc123", isDir: true });
     expect(result).toHaveProperty("url");
     expect(typeof result.url).toBe("string");
+  });
+});
+
+// ─── Task Completion Notification Tests ───────────────────────────────────────
+
+const mockTask = {
+  id: 1,
+  userId: 1,
+  title: "Minha Tarefa",
+  description: null,
+  status: "em_andamento" as const,
+  priority: "media" as const,
+  assignee: null,
+  projectId: null,
+  deadline: null,
+  estimatedHours: null,
+  actualHours: null,
+  completedAt: null,
+  calendarEventId: null,
+  driveClientName: null,
+  driveClientPath: null,
+  notifiedDeadline: null,
+  notifiedOverdue: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  tags: [],
+  subtasks: [],
+};
+
+describe("tasks - notificação de conclusão", () => {
+  it("updateStatus para concluido cria notificação do tipo concluida", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.createNotification).mockClear();
+    vi.mocked(db.getTask).mockResolvedValueOnce(mockTask);
+
+    await caller.tasks.updateStatus({ id: 1, status: "concluido" });
+
+    expect(db.createNotification).toHaveBeenCalledOnce();
+    expect(db.createNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 1,
+        taskId: 1,
+        type: "concluida",
+        title: "Tarefa concluída",
+        message: expect.stringContaining("Minha Tarefa"),
+        read: "0",
+      })
+    );
+  });
+
+  it("updateStatus para status diferente de concluido NÃO cria notificação", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.createNotification).mockClear();
+
+    await caller.tasks.updateStatus({ id: 1, status: "em_andamento" });
+
+    expect(db.createNotification).not.toHaveBeenCalled();
+  });
+
+  it("update com status concluido cria notificação do tipo concluida", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.createNotification).mockClear();
+    vi.mocked(db.getTask).mockResolvedValueOnce(mockTask);
+
+    await caller.tasks.update({ id: 1, status: "concluido" });
+
+    expect(db.createNotification).toHaveBeenCalledOnce();
+    expect(db.createNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: "concluida",
+        taskId: 1,
+      })
+    );
+  });
+
+  it("update sem campo status NÃO cria notificação", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.createNotification).mockClear();
+
+    await caller.tasks.update({ id: 1, title: "Novo título" });
+
+    expect(db.createNotification).not.toHaveBeenCalled();
+  });
+
+  it("updateStatus para concluido quando tarefa não existe NÃO cria notificação", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.createNotification).mockClear();
+    vi.mocked(db.getTask).mockResolvedValueOnce(null);
+
+    await caller.tasks.updateStatus({ id: 999, status: "concluido" });
+
+    expect(db.createNotification).not.toHaveBeenCalled();
   });
 });
 
