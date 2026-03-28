@@ -115,10 +115,6 @@ function DashboardLayoutContent({
   const isMobile = useIsMobile();
 
   useEffect(() => {
-    if (isCollapsed) setIsResizing(false);
-  }, [isCollapsed]);
-
-  useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isResizing) return;
       const sidebarLeft = sidebarRef.current?.getBoundingClientRect().left ?? 0;
@@ -126,7 +122,7 @@ function DashboardLayoutContent({
       if (newWidth >= MIN_WIDTH && newWidth <= MAX_WIDTH) setSidebarWidth(newWidth);
     };
     const handleMouseUp = () => setIsResizing(false);
-    if (isResizing) {
+    if (isResizing && !isCollapsed) {
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
       document.body.style.cursor = "col-resize";
@@ -138,7 +134,7 @@ function DashboardLayoutContent({
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
     };
-  }, [isResizing, setSidebarWidth]);
+  }, [isResizing, isCollapsed, setSidebarWidth]);
 
   return (
     <>

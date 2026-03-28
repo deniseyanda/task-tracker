@@ -18,7 +18,9 @@ function callMCP(tool: string, args: Record<string, unknown>): unknown {
       if (line.startsWith("{") || line.startsWith("[")) {
         try {
           return JSON.parse(line);
-        } catch {}
+        } catch {
+          // line is not valid JSON — skip
+        }
       }
     }
     return { success: true, raw: result };

@@ -344,7 +344,7 @@ export async function getDashboardStats(userId: number) {
 
   // Daily completions last 7 days
   // Use FROM_UNIXTIME with milliseconds divided by 1000, wrapped in try/catch
-  let dailyCompletions: { day: string; count: number }[] = [];
+  let dailyCompletions: { day: string; count: number }[];
   try {
   dailyCompletions = await db
     .select({
@@ -360,7 +360,7 @@ export async function getDashboardStats(userId: number) {
       )
     )
     .groupBy(sql`DATE(FROM_UNIXTIME(CAST(${tasks.completedAt} AS UNSIGNED)/1000))`);
-  } catch (e) {
+  } catch {
     // Fallback: compute daily completions in JS if SQL function unavailable
     const raw = await db
       .select({ completedAt: tasks.completedAt })

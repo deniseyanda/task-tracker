@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { CheckCircle, Loader2, ShieldAlert, Users } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -16,14 +16,10 @@ const ROLE_LABELS: Record<string, string> = {
 export default function JoinWorkspace() {
   const [, navigate] = useLocation();
   const { user, loading: authLoading } = useAuth();
-  const [token, setToken] = useState<string | null>(null);
+  const [token] = useState<string | null>(() =>
+    new URLSearchParams(window.location.search).get("convite")
+  );
   const [accepted, setAccepted] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const t = params.get("convite");
-    if (t) setToken(t);
-  }, []);
 
   const { data: inviteInfo, isLoading: loadingInfo, error: infoError } =
     trpc.collaborators.getInviteInfo.useQuery(

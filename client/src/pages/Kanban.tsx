@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { AlertTriangle, Calendar, CalendarCheck, Clock, ExternalLink, FolderOpen, GripVertical, Loader2, Plus, Search, Tag, Trash2, User, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { AlertTriangle, Calendar, CalendarCheck, ExternalLink, FolderOpen, GripVertical, Loader2, Plus, Search, Trash2, User, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 type Status = "backlog" | "em_andamento" | "concluido" | "bloqueado";
@@ -114,8 +114,9 @@ export default function Kanban() {
   const tasksByStatus = (status: Status) =>
     tasks.filter((t) => t.status === status);
 
+  const [now] = useState(() => Date.now());
   const isOverdue = (task: Task) =>
-    task.deadline && task.deadline < Date.now() && task.status !== "concluido";
+    task.deadline && task.deadline < now && task.status !== "concluido";
 
   return (
     <DashboardLayout>
@@ -435,6 +436,7 @@ function TaskModal({
   });
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (task) {
       setTitle(task.title);
       setDescription(task.description ?? "");
@@ -459,6 +461,7 @@ function TaskModal({
       setDriveClientName("");
       setDriveClientPath("");
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [task, defaultStatus, open, taskDetail]);
 
   const createTask = trpc.tasks.create.useMutation({ onSuccess: onSaved });

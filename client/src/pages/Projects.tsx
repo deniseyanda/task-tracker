@@ -142,6 +142,7 @@ function ProjectModal({
   const [color, setColor] = useState("#dc2626");
 
   useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (project) {
       setName(project.name);
       setDescription(project.description ?? "");
@@ -151,6 +152,7 @@ function ProjectModal({
       setDescription("");
       setColor("#dc2626");
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [project, open]);
 
   const create = trpc.projects.create.useMutation({ onSuccess: onSaved });
