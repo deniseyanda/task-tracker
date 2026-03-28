@@ -76,6 +76,31 @@ export async function getUserByOpenId(openId: string) {
   return result[0];
 }
 
+export async function getUserByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(users).where(eq(users.email, email)).limit(1);
+  return result[0];
+}
+
+export async function createEmailUser(data: {
+  openId: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.insert(users).values({
+    openId: data.openId,
+    name: data.name,
+    email: data.email,
+    passwordHash: data.passwordHash,
+    loginMethod: "email",
+    lastSignedIn: new Date(),
+  });
+}
+
 // ─── Projects ─────────────────────────────────────────────────────────────────
 
 export async function createProject(data: InsertProject) {

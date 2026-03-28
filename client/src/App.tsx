@@ -14,6 +14,7 @@ import Clients from "./pages/Clients";
 import Collaborators from "./pages/Collaborators";
 import JoinWorkspace from "./pages/JoinWorkspace";
 import Import from "./pages/Import";
+import Login from "./pages/Login";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/assistente" component={Assistant} />
       <Route path="/clientes" component={Clients} />
       <Route path="/colaboradores" component={Collaborators} />
+      <Route path="/login" component={Login} />
       <Route path="/entrar" component={JoinWorkspace} />
       <Route path="/importar" component={Import} />
       <Route path="/404" component={NotFound} />

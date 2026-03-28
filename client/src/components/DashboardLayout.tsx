@@ -78,7 +78,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               Gerencie suas tarefas com precisão. Autentique-se para continuar.
             </p>
             <Button
-              onClick={() => { window.location.href = getLoginUrl(); }}
+              onClick={() => { window.location.href = "/login"; }}
               className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] transition-colors px-8 py-3 text-sm font-semibold tracking-wide uppercase"
             >
               Entrar

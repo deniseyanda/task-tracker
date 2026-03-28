@@ -60,7 +60,7 @@ export default function JoinWorkspace() {
           </p>
           <Button
             onClick={() => {
-              window.location.href = getLoginUrl();
+              window.location.href = "/login";
             }}
             className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] px-8 py-3 text-sm font-bold uppercase tracking-wide"
           >

@@ -9,15 +9,38 @@ import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import { notifyOwner } from "./_core/notification";
+import { sdk } from "./_core/sdk";
+import { ENV } from "./_core/env";
+import crypto from "crypto";
+import { nanoid } from "nanoid";
 import {
-  createNotification,
+  createEmailUser, createNotification,
   createProject, createSubtask, createTag, createTask,
   deleteProject, deleteSubtask, deleteTag, deleteTask,
   getDashboardStats, getOverdueTasks, getTask, getTasksDueSoon,
-  getUniqueAssignees, getWeeklyReportData, listProjects, listTags, listTasks,
+  getUniqueAssignees, getUserByEmail, getUserByOpenId, getWeeklyReportData,
+  listProjects, listTags, listTasks,
   markNotifiedDeadline, markNotifiedOverdue,
   updateProject, updateSubtask, updateTask,
+  upsertUser,
 } from "./db";
+
+const hashPassword = (password: string): string => {
+  const salt = crypto.randomBytes(16).toString("hex");
+  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${hash}`;
+};
+
+const verifyPassword = (password: string, stored: string): boolean => {
+  const [salt, hash] = stored.split(":");
+  if (!salt || !hash) return false;
+  try {
+    const buf = crypto.scryptSync(password, salt, 64);
+    return crypto.timingSafeEqual(buf, Buffer.from(hash, "hex"));
+  } catch {
+    return false;
+  }
+};
 
 // ─── Projects Router ──────────────────────────────────────────────────────────
 
@@ -429,12 +452,67 @@ const notificationsRouter = router({
 export const appRouter = router({
   system: systemRouter,
   auth: router({
-    me: publicProcedure.query((opts) => opts.ctx.user),
+    me: publicProcedure.query((opts) => {
+      const user = opts.ctx.user;
+      if (!user) return null;
+      const { passwordHash: _pw, ...publicUser } = user as typeof user & { passwordHash?: string };
+      return publicUser;
+    }),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
     }),
+    register: publicProcedure
+      .input(z.object({
+        name: z.string().min(1, "Nome é obrigatório"),
+        email: z.string().email("Email inválido"),
+        password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const existing = await getUserByEmail(input.email);
+        if (existing) {
+          throw new TRPCError({ code: "CONFLICT", message: "Este email já está cadastrado" });
+        }
+        const openId = `email_${nanoid()}`;
+        await createEmailUser({
+          openId,
+          name: input.name,
+          email: input.email,
+          passwordHash: hashPassword(input.password),
+        });
+        const user = await getUserByOpenId(openId);
+        if (!user) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Erro ao criar conta" });
+        const token = await sdk.signSession({
+          openId,
+          appId: ENV.appId || "task-tracker",
+          name: input.name,
+        });
+        ctx.res.cookie(COOKIE_NAME, token, getSessionCookieOptions(ctx.req));
+        const { passwordHash: _pw, ...publicUser } = user as typeof user & { passwordHash?: string };
+        return { success: true as const, user: publicUser };
+      }),
+    login: publicProcedure
+      .input(z.object({
+        email: z.string().email("Email inválido"),
+        password: z.string().min(1, "Senha é obrigatória"),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const user = await getUserByEmail(input.email);
+        const stored = (user as (typeof user & { passwordHash?: string | null }) | undefined)?.passwordHash;
+        if (!user || !stored || !verifyPassword(input.password, stored)) {
+          throw new TRPCError({ code: "UNAUTHORIZED", message: "Email ou senha incorretos" });
+        }
+        const token = await sdk.signSession({
+          openId: user.openId,
+          appId: ENV.appId || "task-tracker",
+          name: user.name || input.email,
+        });
+        ctx.res.cookie(COOKIE_NAME, token, getSessionCookieOptions(ctx.req));
+        await upsertUser({ openId: user.openId, lastSignedIn: new Date() });
+        const { passwordHash: _pw, ...publicUser } = user as typeof user & { passwordHash?: string };
+        return { success: true as const, user: publicUser };
+      }),
   }),
   projects: projectsRouter,
   tags: tagsRouter,
