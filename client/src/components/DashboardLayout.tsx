@@ -22,7 +22,7 @@ import {
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
 import { BarChart3, Bot, FolderOpen, LayoutDashboard, LogOut, PanelLeft, Tag, Trello, Upload, UserCog, Users } from "lucide-react";
-import { CSSProperties, useEffect, useRef, useState } from "react";
+import { CSSProperties, startTransition, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import NotificationBell from "./NotificationBell";
@@ -107,11 +107,18 @@ function DashboardLayoutContent({
 }) {
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
-  const { state, toggleSidebar } = useSidebar();
+  const { state, toggleSidebar, setOpenMobile } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const activeMenuItem = menuItems.find((item) => item.path === location);
+
+  // Close the mobile Sheet before the route transition so Radix UI's portal
+  // cleanup doesn't race with React unmounting the previous page component,
+  // which causes "removeChild: node is not a child of this node".
+  useEffect(() => {
+    setOpenMobile(false);
+  }, [location]);
   const isMobile = useIsMobile();
 
   useEffect(() => {
@@ -170,7 +177,7 @@ function DashboardLayoutContent({
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
                       isActive={isActive}
-                      onClick={() => setLocation(item.path)}
+                      onClick={() => startTransition(() => setLocation(item.path))}
                       tooltip={item.label}
                       className={`h-9 transition-all font-medium text-xs tracking-wide uppercase ${
                         isActive
