@@ -5,9 +5,11 @@ import {
   createInvite,
   deleteInvite,
   getInviteByToken,
+  listAllUsers,
   listCollaborators,
   listInvites,
   removeCollaborator,
+  setUserRole,
   updateCollaboratorRole,
   useInvite,
   getDb,
@@ -175,6 +177,31 @@ export const collaboratorsRouter = router({
         used: !!invite.usedAt,
         expired: new Date() > invite.expiresAt,
       };
+    }),
+
+  /** List all users in the system — system admin only */
+  listAllUsers: protectedProcedure.query(async ({ ctx }) => {
+    if (ctx.user.role !== "admin") {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Acesso negado" });
+    }
+    return listAllUsers();
+  }),
+
+  /** Set a user's system role — system admin only */
+  setUserRole: protectedProcedure
+    .input(z.object({
+      userId: z.number(),
+      role: z.enum(["admin", "user"]),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      if (ctx.user.role !== "admin") {
+        throw new TRPCError({ code: "FORBIDDEN", message: "Apenas o admin do sistema pode alterar roles" });
+      }
+      if (ctx.user.id === input.userId) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Você não pode alterar seu próprio role" });
+      }
+      await setUserRole(input.userId, input.role);
+      return { success: true };
     }),
 
   /** Get current user's permission level */

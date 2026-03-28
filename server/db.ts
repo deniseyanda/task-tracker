@@ -83,11 +83,19 @@ export async function getUserByEmail(email: string) {
   return result[0];
 }
 
+export async function countUsers(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const [row] = await db.select({ count: sql<number>`count(*)` }).from(users);
+  return Number(row?.count ?? 0);
+}
+
 export async function createEmailUser(data: {
   openId: string;
   name: string;
   email: string;
   passwordHash: string;
+  role?: InsertUser["role"];
 }) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
@@ -98,7 +106,31 @@ export async function createEmailUser(data: {
     passwordHash: data.passwordHash,
     loginMethod: "email",
     lastSignedIn: new Date(),
+    ...(data.role ? { role: data.role } : {}),
   });
+}
+
+export async function listAllUsers() {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select({
+      id: users.id,
+      openId: users.openId,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+      lastSignedIn: users.lastSignedIn,
+      loginMethod: users.loginMethod,
+    })
+    .from(users)
+    .orderBy(users.name);
+}
+
+export async function setUserRole(userId: number, role: InsertUser["role"]) {
+  const db = await getDb();
+  if (!db) throw new Error("DB unavailable");
+  await db.update(users).set({ role }).where(eq(users.id, userId));
 }
 
 // ─── Projects ─────────────────────────────────────────────────────────────────

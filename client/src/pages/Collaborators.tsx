@@ -33,6 +33,7 @@ import {
   Link2,
   Loader2,
   Mail,
+  Settings2,
   ShieldCheck,
   Trash2,
   UserCheck,
@@ -93,16 +94,22 @@ export default function Collaborators() {
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editRole, setEditRole] = useState<CollabRole>("operador");
+  const [editingUserId, setEditingUserId] = useState<number | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [removeTarget, setRemoveTarget] = useState<{ id: number; name: string } | null>(null);
 
   const { data: perms } = trpc.collaborators.myPermissions.useQuery();
+  const isSystemAdmin = perms?.role === "admin";
+
   const { data: collaborators = [], isLoading } = trpc.collaborators.list.useQuery(undefined, {
     enabled: (perms?.level ?? 0) >= 3,
   });
   const { data: invitesList = [] } = trpc.collaborators.listInvites.useQuery(undefined, {
     enabled: !!perms?.canManageCollaborators,
+  });
+  const { data: allUsers = [], isLoading: loadingUsers } = trpc.collaborators.listAllUsers.useQuery(undefined, {
+    enabled: isSystemAdmin,
   });
 
   const updateRole = trpc.collaborators.updateRole.useMutation({
@@ -128,6 +135,15 @@ export default function Collaborators() {
       utils.collaborators.listInvites.invalidate();
       toast.success("Convite cancelado");
     },
+  });
+
+  const setUserRoleMutation = trpc.collaborators.setUserRole.useMutation({
+    onSuccess: () => {
+      utils.collaborators.listAllUsers.invalidate();
+      setEditingUserId(null);
+      toast.success("Role atualizado");
+    },
+    onError: (e) => toast.error(e.message),
   });
 
   const handleCopyLink = () => {
@@ -375,6 +391,94 @@ export default function Collaborators() {
           </div>
         )}
       </div>
+
+      {/* System users section — visible only to system admin */}
+      {isSystemAdmin && (
+        <div className="px-6 md:px-10 pb-10 max-w-5xl">
+          <div className="mb-4 border-b-2 border-black pb-3 flex items-center gap-2">
+            <Settings2 className="h-4 w-4" />
+            <p className="text-xs font-black uppercase tracking-widest">
+              Todos os Usuários do Sistema
+            </p>
+          </div>
+          {loadingUsers ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-gray-300" />
+            </div>
+          ) : (
+            <div className="border border-black">
+              <div className="grid grid-cols-12 px-4 py-2 bg-black text-white text-[10px] font-bold uppercase tracking-widest">
+                <div className="col-span-4">Nome</div>
+                <div className="col-span-3">Email</div>
+                <div className="col-span-2">Role</div>
+                <div className="col-span-2">Método</div>
+                <div className="col-span-1 text-right">Ações</div>
+              </div>
+              {allUsers.map((u, idx) => (
+                <div
+                  key={u.id}
+                  className={`grid grid-cols-12 px-4 py-3 items-center border-b border-gray-100 last:border-b-0 ${
+                    idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
+                  }`}
+                >
+                  <div className="col-span-4 font-semibold text-sm truncate">{u.name ?? "—"}</div>
+                  <div className="col-span-3 text-xs text-gray-500 truncate flex items-center gap-1">
+                    <Mail className="h-3 w-3 shrink-0" />
+                    {u.email ?? "—"}
+                  </div>
+                  <div className="col-span-2">
+                    {editingUserId === u.id ? (
+                      <div className="flex items-center gap-1">
+                        <Select
+                          defaultValue={u.role === "admin" ? "admin" : "user"}
+                          onValueChange={(v) =>
+                            setUserRoleMutation.mutate({ userId: u.id, role: v as "admin" | "user" })
+                          }
+                        >
+                          <SelectTrigger className="h-7 text-xs border-black w-24">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="user">User</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <button
+                          onClick={() => setEditingUserId(null)}
+                          className="p-1 hover:bg-gray-100"
+                        >
+                          <X className="h-3.5 w-3.5 text-gray-400" />
+                        </button>
+                      </div>
+                    ) : (
+                      <span
+                        className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 text-white ${
+                          u.role === "admin" ? "bg-[oklch(0.45_0.22_27)]" : "bg-gray-400"
+                        }`}
+                      >
+                        {u.role === "admin" && <Crown className="h-3 w-3" />}
+                        {u.role ?? "user"}
+                      </span>
+                    )}
+                  </div>
+                  <div className="col-span-2 text-xs text-gray-400">{u.loginMethod ?? "—"}</div>
+                  <div className="col-span-1 flex justify-end">
+                    {editingUserId !== u.id && (
+                      <button
+                        onClick={() => setEditingUserId(u.id)}
+                        className="p-1.5 hover:bg-gray-100 text-gray-400 hover:text-black transition-colors"
+                        title="Alterar role"
+                      >
+                        <ShieldCheck className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Invite Modal */}
       <Dialog
