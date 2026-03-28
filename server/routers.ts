@@ -10,6 +10,7 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { invokeLLM } from "./_core/llm";
 import { notifyOwner } from "./_core/notification";
 import {
+  createNotification,
   createProject, createSubtask, createTag, createTask,
   deleteProject, deleteSubtask, deleteTag, deleteTask,
   getDashboardStats, getOverdueTasks, getTask, getTasksDueSoon,
@@ -129,13 +130,27 @@ const tasksRouter = router({
       driveClientPath: z.string().nullable().optional(),
       tagIds: z.array(z.number()).optional(),
     }))
-    .mutation(({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const { id, tagIds, ...data } = input;
       const cleanData: Record<string, unknown> = {};
       for (const [k, v] of Object.entries(data)) {
         if (v !== undefined) cleanData[k] = v;
       }
-      return updateTask(id, ctx.user.id, cleanData as Parameters<typeof updateTask>[2], tagIds);
+      const result = await updateTask(id, ctx.user.id, cleanData as Parameters<typeof updateTask>[2], tagIds);
+      if (data.status === "concluido") {
+        const task = await getTask(id, ctx.user.id);
+        if (task) {
+          await createNotification({
+            userId: ctx.user.id,
+            taskId: id,
+            type: "concluida",
+            title: "Tarefa concluída",
+            message: `"${task.title}" foi marcada como concluída.`,
+            read: "0",
+          });
+        }
+      }
+      return result;
     }),
 
   updateStatus: protectedProcedure
@@ -143,9 +158,23 @@ const tasksRouter = router({
       id: z.number(),
       status: statusEnum,
     }))
-    .mutation(({ ctx, input }) =>
-      updateTask(input.id, ctx.user.id, { status: input.status })
-    ),
+    .mutation(async ({ ctx, input }) => {
+      const result = await updateTask(input.id, ctx.user.id, { status: input.status });
+      if (input.status === "concluido") {
+        const task = await getTask(input.id, ctx.user.id);
+        if (task) {
+          await createNotification({
+            userId: ctx.user.id,
+            taskId: input.id,
+            type: "concluida",
+            title: "Tarefa concluída",
+            message: `"${task.title}" foi marcada como concluída.`,
+            read: "0",
+          });
+        }
+      }
+      return result;
+    }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.number() }))
