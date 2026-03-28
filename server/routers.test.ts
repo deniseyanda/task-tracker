@@ -266,20 +266,242 @@ describe("dashboard", () => {
 
 // ─── Notifications Tests ──────────────────────────────────────────────────────
 
-describe("notifications", () => {
-  it("checkAndNotify returns notified count", async () => {
+const mockNotification = {
+  id: 10,
+  userId: 1,
+  taskId: 1,
+  type: "concluida" as const,
+  title: "Tarefa concluída",
+  message: '"Minha Tarefa" foi marcada como concluída.',
+  read: "0" as const,
+  createdAt: new Date(),
+};
+
+describe("notifications - list e unreadCount", () => {
+  it("list retorna array vazio quando não há notificações", async () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
-    const result = await caller.notifications.checkAndNotify();
-    expect(result).toHaveProperty("notified");
-    expect(typeof result.notified).toBe("number");
+    vi.mocked(db.listNotifications).mockResolvedValueOnce([]);
+
+    const result = await caller.notifications.list();
+
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(0);
   });
 
-  it("weeklyReport sends report", async () => {
+  it("list retorna as notificações do usuário", async () => {
     const { ctx } = createAuthContext();
     const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.listNotifications).mockResolvedValueOnce([mockNotification]);
+
+    const result = await caller.notifications.list();
+
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({ id: 10, type: "concluida", read: "0" });
+  });
+
+  it("list chama db com o userId correto", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.listNotifications).mockClear();
+
+    await caller.notifications.list();
+
+    expect(db.listNotifications).toHaveBeenCalledWith(1);
+  });
+
+  it("unreadCount retorna 0 quando não há notificações não lidas", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.countUnreadNotifications).mockResolvedValueOnce(0);
+
+    const result = await caller.notifications.unreadCount();
+
+    expect(result).toBe(0);
+  });
+
+  it("unreadCount retorna a contagem correta", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.countUnreadNotifications).mockResolvedValueOnce(5);
+
+    const result = await caller.notifications.unreadCount();
+
+    expect(result).toBe(5);
+  });
+});
+
+describe("notifications - markRead e markAllRead", () => {
+  it("markRead chama db com o id e userId corretos", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.markNotificationRead).mockClear();
+
+    await caller.notifications.markRead({ id: 10 });
+
+    expect(db.markNotificationRead).toHaveBeenCalledWith(10, 1);
+  });
+
+  it("markRead requer id numérico", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+
+    // @ts-expect-error — testando validação de input
+    await expect(caller.notifications.markRead({ id: "abc" })).rejects.toThrow();
+  });
+
+  it("markAllRead chama db com o userId correto", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.markAllNotificationsRead).mockClear();
+
+    await caller.notifications.markAllRead();
+
+    expect(db.markAllNotificationsRead).toHaveBeenCalledWith(1);
+  });
+});
+
+describe("notifications - delete e clearRead", () => {
+  it("delete chama db com o id e userId corretos", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.deleteNotification).mockClear();
+
+    await caller.notifications.delete({ id: 10 });
+
+    expect(db.deleteNotification).toHaveBeenCalledWith(10, 1);
+  });
+
+  it("delete requer id numérico", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+
+    // @ts-expect-error — testando validação de input
+    await expect(caller.notifications.delete({ id: "x" })).rejects.toThrow();
+  });
+
+  it("clearRead chama db com o userId correto", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.clearReadNotifications).mockClear();
+
+    await caller.notifications.clearRead();
+
+    expect(db.clearReadNotifications).toHaveBeenCalledWith(1);
+  });
+});
+
+describe("notifications - runJob", () => {
+  it("runJob chama runNotificationJob com o userId correto", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.runNotificationJob).mockClear();
+
+    await caller.notifications.runJob();
+
+    expect(db.runNotificationJob).toHaveBeenCalledWith(1);
+  });
+});
+
+describe("notifications - checkAndNotify", () => {
+  it("retorna notified=0 quando não há tarefas pendentes", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.getTasksDueSoon).mockResolvedValueOnce([]);
+    vi.mocked(db.getOverdueTasks).mockResolvedValueOnce([]);
+
+    const result = await caller.notifications.checkAndNotify();
+
+    expect(result.notified).toBe(0);
+  });
+
+  it("retorna contagem correta quando há tarefas vencendo em breve", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const dueSoon = [
+      { id: 1, title: "Tarefa A", deadline: Date.now() + 3600000, userId: 1 },
+      { id: 2, title: "Tarefa B", deadline: Date.now() + 7200000, userId: 1 },
+    ];
+    vi.mocked(db.getTasksDueSoon).mockResolvedValueOnce(dueSoon as never);
+    vi.mocked(db.getOverdueTasks).mockResolvedValueOnce([]);
+
+    const result = await caller.notifications.checkAndNotify();
+
+    expect(result.notified).toBe(2);
+  });
+
+  it("retorna contagem correta quando há tarefas atrasadas", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    const overdue = [
+      { id: 3, title: "Tarefa Atrasada", deadline: Date.now() - 86400000, userId: 1 },
+    ];
+    vi.mocked(db.getTasksDueSoon).mockResolvedValueOnce([]);
+    vi.mocked(db.getOverdueTasks).mockResolvedValueOnce(overdue as never);
+
+    const result = await caller.notifications.checkAndNotify();
+
+    expect(result.notified).toBe(1);
+  });
+
+  it("soma tarefas vencendo e atrasadas na contagem total", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.getTasksDueSoon).mockResolvedValueOnce([
+      { id: 1, title: "Due Soon", deadline: Date.now() + 3600000, userId: 1 },
+    ] as never);
+    vi.mocked(db.getOverdueTasks).mockResolvedValueOnce([
+      { id: 2, title: "Overdue", deadline: Date.now() - 86400000, userId: 1 },
+    ] as never);
+
+    const result = await caller.notifications.checkAndNotify();
+
+    expect(result.notified).toBe(2);
+  });
+
+  it("marca tarefas como notificadas após envio", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.markNotifiedDeadline).mockClear();
+    vi.mocked(db.markNotifiedOverdue).mockClear();
+    vi.mocked(db.getTasksDueSoon).mockResolvedValueOnce([
+      { id: 5, title: "Due", deadline: Date.now() + 3600000, userId: 1 },
+    ] as never);
+    vi.mocked(db.getOverdueTasks).mockResolvedValueOnce([
+      { id: 6, title: "Late", deadline: Date.now() - 86400000, userId: 1 },
+    ] as never);
+
+    await caller.notifications.checkAndNotify();
+
+    expect(db.markNotifiedDeadline).toHaveBeenCalledWith(5);
+    expect(db.markNotifiedOverdue).toHaveBeenCalledWith(6);
+  });
+});
+
+describe("notifications - weeklyReport", () => {
+  it("retorna sent=false quando não há dados", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.getWeeklyReportData).mockResolvedValueOnce(null);
+
     const result = await caller.notifications.weeklyReport();
-    expect(result).toHaveProperty("sent");
+
+    expect(result.sent).toBe(false);
+  });
+
+  it("retorna sent=true quando há dados semanais", async () => {
+    const { ctx } = createAuthContext();
+    const caller = appRouter.createCaller(ctx);
+    vi.mocked(db.getWeeklyReportData).mockResolvedValueOnce({
+      completed: [{ id: 1, title: "Tarefa X" }] as never,
+      completedCount: 1,
+      createdCount: 3,
+      pendingCount: 2,
+    });
+
+    const result = await caller.notifications.weeklyReport();
+
+    expect(result.sent).toBe(true);
   });
 });
 
