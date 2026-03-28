@@ -4,6 +4,8 @@ import { z } from "zod";
 import { getTask, listTasks, updateTask } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
 
+type CalendarResponse = { created?: { id?: string }[]; [k: string]: unknown };
+
 function callMCP(tool: string, args: Record<string, unknown>): unknown {
   try {
     const input = JSON.stringify(args);
@@ -24,11 +26,12 @@ function callMCP(tool: string, args: Record<string, unknown>): unknown {
       }
     }
     return { success: true, raw: result };
-  } catch (error: any) {
-    console.error("[Calendar MCP Error]", error.message);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[Calendar MCP Error]", message);
     throw new TRPCError({
       code: "INTERNAL_SERVER_ERROR",
-      message: `Google Calendar error: ${error.message}`,
+      message: `Google Calendar error: ${message}`,
     });
   }
 }
@@ -66,9 +69,9 @@ export const calendarRouter = router({
         const result = callMCP("google_calendar_create_events", {
           events: [eventPayload],
           calendar_id: "primary",
-        }) as any;
+        }) as CalendarResponse;
 
-        const eventId = result?.created?.[0]?.id ?? result?.[0]?.id ?? null;
+        const eventId = result.created?.[0]?.id ?? (result[0] as { id?: string } | undefined)?.id ?? null;
         if (eventId) {
           await updateTask(input.taskId, ctx.user.id, { calendarEventId: eventId });
         }
@@ -106,8 +109,8 @@ export const calendarRouter = router({
           const result = callMCP("google_calendar_create_events", {
             events: [eventPayload],
             calendar_id: "primary",
-          }) as any;
-          const eventId = result?.created?.[0]?.id ?? result?.[0]?.id ?? null;
+          }) as CalendarResponse;
+          const eventId = result.created?.[0]?.id ?? (result[0] as { id?: string } | undefined)?.id ?? null;
           if (eventId) {
             await updateTask(task.id, ctx.user.id, { calendarEventId: eventId });
           }

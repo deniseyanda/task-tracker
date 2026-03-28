@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/refs */
 import { useRef } from "react";
 
-type noop = (...args: any[]) => any;
+type noop = (...args: unknown[]) => unknown;
 
 /**
  * usePersistFn instead of useCallback to reduce cognitive load
@@ -11,10 +12,9 @@ export function usePersistFn<T extends noop>(fn: T) {
 
   const persistFn = useRef<T>(null);
   if (!persistFn.current) {
-    persistFn.current = function (this: unknown, ...args) {
-      return fnRef.current!.apply(this, args);
-    } as T;
+    persistFn.current = ((...args: unknown[]) => fnRef.current!(...args)) as T;
   }
 
   return persistFn.current!;
 }
+/* eslint-enable react-hooks/refs */

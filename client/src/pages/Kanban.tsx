@@ -446,8 +446,8 @@ function TaskModal({
       setProjectId(task.projectId ? String(task.projectId) : "none");
       setDeadline(task.deadline ? new Date(task.deadline).toISOString().split("T")[0] : "");
       setSelectedTags(task.tags?.map((t) => t.id) ?? []);
-      setDriveClientName((taskDetail as any)?.driveClientName ?? "");
-      setDriveClientPath((taskDetail as any)?.driveClientPath ?? "");
+      setDriveClientName((taskDetail as Record<string, unknown>)?.driveClientName ?? "");
+      setDriveClientPath((taskDetail as Record<string, unknown>)?.driveClientPath ?? "");
     } else {
       setTitle("");
       setDescription("");

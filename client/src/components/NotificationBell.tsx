@@ -2,7 +2,6 @@ import { trpc } from "@/lib/trpc";
 import { Bell, BellRing, CheckCheck, Clock, Loader2, Trash2, TriangleAlert } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Link } from "wouter";
 
 type NotifType = "prazo_proximo" | "atrasada" | "concluida" | "sistema";
 
@@ -108,7 +107,6 @@ export default function NotificationBell() {
     if (read === "0") markRead.mutate({ id });
   };
 
-  const unread = notifications.filter((n) => n.read === "0");
   const hasUnread = unreadCount > 0;
 
   return (

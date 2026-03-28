@@ -1,5 +1,7 @@
-import { and, desc, eq, gte, inArray, like, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, like, or, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
+
+type MySQLResult = { insertId: number };
 import {
   InsertInvite,
   InsertNotification,
@@ -80,7 +82,7 @@ export async function createProject(data: InsertProject) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
   const [result] = await db.insert(projects).values(data);
-  return { id: (result as any).insertId as number };
+  return { id: (result as MySQLResult).insertId as number };
 }
 
 export async function listProjects(userId: number) {
@@ -113,7 +115,7 @@ export async function createTag(data: InsertTag) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
   const [result] = await db.insert(tags).values(data);
-  return { id: (result as any).insertId as number };
+  return { id: (result as MySQLResult).insertId as number };
 }
 
 export async function listTags(userId: number) {
@@ -135,7 +137,7 @@ export async function createTask(data: InsertTask, tagIds: number[] = []) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
   const [result] = await db.insert(tasks).values(data);
-  const taskId = (result as any).insertId as number;
+  const taskId = (result as MySQLResult).insertId as number;
   if (tagIds.length > 0) {
     await db.insert(taskTags).values(tagIds.map((tagId) => ({ taskId, tagId })));
   }
@@ -261,7 +263,7 @@ export async function createSubtask(data: InsertSubtask) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
   const [result] = await db.insert(subtasks).values(data);
-  return { id: (result as any).insertId as number };
+  return { id: (result as MySQLResult).insertId as number };
 }
 
 export async function updateSubtask(id: number, userId: number, completed: boolean) {
@@ -548,7 +550,7 @@ export async function createInvite(data: InsertInvite) {
   const db = await getDb();
   if (!db) throw new Error("DB unavailable");
   const [result] = await db.insert(invites).values(data);
-  return { id: (result as any).insertId as number };
+  return { id: (result as MySQLResult).insertId as number };
 }
 
 /** Get invite by token */

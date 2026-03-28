@@ -10,7 +10,6 @@ import {
   removeCollaborator,
   updateCollaboratorRole,
   useInvite,
-  getUserByOpenId,
   getDb,
 } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";

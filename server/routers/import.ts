@@ -24,7 +24,7 @@ import multer from "multer";
 import * as XLSX from "xlsx";
 import { getDb } from "../db";
 import { projects, tasks } from "../../drizzle/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { createContext } from "../_core/context";
 
 const router = express.Router();

@@ -16,6 +16,7 @@ const DialogCompositionContext = React.createContext<{
   markCompositionEnd: () => {},
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useDialogComposition = () =>
   React.useContext(DialogCompositionContext);
 
@@ -104,7 +105,7 @@ function DialogContent({
     (e: KeyboardEvent) => {
       // Check both the native isComposing property and our context state
       // This handles Safari's timing issues with composition events
-      const isCurrentlyComposing = (e as any).isComposing || isComposing();
+      const isCurrentlyComposing = e.isComposing || isComposing();
 
       // If IME is composing, prevent dialog from closing
       if (isCurrentlyComposing) {

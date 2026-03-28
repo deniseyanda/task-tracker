@@ -135,7 +135,7 @@ const tasksRouter = router({
       for (const [k, v] of Object.entries(data)) {
         if (v !== undefined) cleanData[k] = v;
       }
-      return updateTask(id, ctx.user.id, cleanData as any, tagIds);
+      return updateTask(id, ctx.user.id, cleanData as Parameters<typeof updateTask>[2], tagIds);
     }),
 
   updateStatus: protectedProcedure
