@@ -1,5 +1,21 @@
 import { trpc } from "@/lib/trpc";
 import { UNAUTHED_ERR_MSG } from '@shared/const';
+
+// Patch Node.prototype.removeChild to handle the race condition between
+// React 19 concurrent renderer and Radix UI portal cleanup. When navigating
+// away from a page that has an open Dialog/Sheet/DropdownMenu, React may try
+// to remove a portal node that Radix has already removed during its CSS
+// close-animation cleanup, throwing "removeChild: node is not a child of
+// this node". Making this a no-op is the correct behaviour — the node is
+// already gone, which is the desired outcome.
+const _nativeRemoveChild = Node.prototype.removeChild;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(Node.prototype as any).removeChild = function <T extends Node>(child: T): T {
+  if (child.parentNode !== this) {
+    return child;
+  }
+  return _nativeRemoveChild.call(this, child) as T;
+};
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";

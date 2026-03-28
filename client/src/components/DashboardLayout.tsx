@@ -113,9 +113,7 @@ function DashboardLayoutContent({
   const sidebarRef = useRef<HTMLDivElement>(null);
   const activeMenuItem = menuItems.find((item) => item.path === location);
 
-  // Close the mobile Sheet before the route transition so Radix UI's portal
-  // cleanup doesn't race with React unmounting the previous page component,
-  // which causes "removeChild: node is not a child of this node".
+  // Keep as fallback for programmatic navigation / browser back-forward.
   useEffect(() => {
     setOpenMobile(false);
   }, [location]);
@@ -177,7 +175,7 @@ function DashboardLayoutContent({
                   <SidebarMenuItem key={item.path}>
                     <SidebarMenuButton
                       isActive={isActive}
-                      onClick={() => startTransition(() => setLocation(item.path))}
+                      onClick={() => { setOpenMobile(false); startTransition(() => setLocation(item.path)); }}
                       tooltip={item.label}
                       className={`h-9 transition-all font-medium text-xs tracking-wide uppercase ${
                         isActive
