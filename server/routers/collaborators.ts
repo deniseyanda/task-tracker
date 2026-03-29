@@ -97,8 +97,9 @@ export const collaboratorsRouter = router({
       }
       const token = nanoid(48);
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+      const ownerId = ctx.user.ownerId ?? ctx.user.id;
       await createInvite({
-        ownerId: ctx.user.id,
+        ownerId,
         token,
         email: input.email,
         role: input.role,
@@ -114,7 +115,7 @@ export const collaboratorsRouter = router({
     if (!isOwnerOrAdmin(ctx.user.role)) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Acesso negado" });
     }
-    return listInvites(ctx.user.id);
+    return listInvites(ctx.user.ownerId ?? ctx.user.id);
   }),
 
   /** Delete an invite */
@@ -124,7 +125,7 @@ export const collaboratorsRouter = router({
       if (!isOwnerOrAdmin(ctx.user.role)) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Acesso negado" });
       }
-      await deleteInvite(input.id, ctx.user.id);
+      await deleteInvite(input.id, ctx.user.ownerId ?? ctx.user.id);
       return { success: true };
     }),
 

@@ -54,7 +54,7 @@ const ROLE_CONFIG: Record<
     label: "Administrador",
     bg: "bg-[oklch(0.45_0.22_27)]",
     icon: <Crown className="h-3 w-3" />,
-    description: "Acesso total, exceto convidar colaboradores",
+    description: "Acesso total: gerenciar colaboradores, convidar, alterar roles e remover membros",
   },
   diretor: {
     label: "Diretor",
