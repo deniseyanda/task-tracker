@@ -1,12 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
@@ -194,29 +188,28 @@ function DashboardLayoutContent({
 
           {/* Footer */}
           <SidebarFooter className="p-3 border-t border-[oklch(0.2_0_0)]">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-3 px-1 py-1 hover:bg-[oklch(0.2_0_0)] transition-colors w-full text-left focus:outline-none">
-                  <Avatar className="h-8 w-8 shrink-0 bg-[oklch(0.45_0.22_27)]">
-                    <AvatarFallback className="text-xs font-bold bg-[oklch(0.45_0.22_27)] text-white">
-                      {user?.name?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {!isCollapsed && (
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold truncate text-white">{user?.name || "-"}</p>
-                      <p className="text-xs text-[oklch(0.5_0_0)] truncate">{user?.email || "-"}</p>
-                    </div>
-                  )}
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive focus:text-destructive">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>Sair</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex items-center gap-2">
+              <Avatar className="h-8 w-8 shrink-0 bg-[oklch(0.45_0.22_27)]">
+                <AvatarFallback className="text-xs font-bold bg-[oklch(0.45_0.22_27)] text-white">
+                  {user?.name?.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              {!isCollapsed && (
+                <>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold truncate text-white">{user?.name || "-"}</p>
+                    <p className="text-xs text-[oklch(0.5_0_0)] truncate">{user?.email || "-"}</p>
+                  </div>
+                  <button
+                    onClick={logout}
+                    title="Sair"
+                    className="h-8 w-8 flex items-center justify-center hover:bg-[oklch(0.2_0_0)] transition-colors focus:outline-none shrink-0"
+                  >
+                    <LogOut className="h-4 w-4 text-[oklch(0.5_0_0)] hover:text-white" />
+                  </button>
+                </>
+              )}
+            </div>
           </SidebarFooter>
         </Sidebar>
 
