@@ -57,8 +57,8 @@ export default function Home() {
       <div className="p-6 md:p-10 max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-10 border-b-2 border-black pb-6">
-          <p className="text-xs font-semibold tracking-widest uppercase text-[oklch(0.45_0.22_27)] mb-1">
-            Visão Geral
+          <p className="text-xs font-medium text-[oklch(0.45_0.22_27)] mb-1">
+            Visão geral
           </p>
           <h1 className="text-4xl font-black tracking-tight text-black">Dashboard</h1>
         </div>
@@ -67,27 +67,23 @@ export default function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-0 mb-10 border border-black">
           <StatCard
             icon={<ListTodo className="h-5 w-5" />}
-            label="Total de Tarefas"
+            label="Total de tarefas"
             value={isLoading ? "—" : totalTasks}
-            accent={false}
           />
           <StatCard
             icon={<CheckCircle2 className="h-5 w-5" />}
             label="Concluídas esta semana"
             value={isLoading ? "—" : stats?.completedThisWeek ?? 0}
-            accent={true}
           />
           <StatCard
             icon={<TrendingUp className="h-5 w-5" />}
             label="Concluídas este mês"
             value={isLoading ? "—" : stats?.completedThisMonth ?? 0}
-            accent={false}
           />
           <StatCard
             icon={<AlertTriangle className="h-5 w-5" />}
-            label="Tarefas Atrasadas"
+            label="Tarefas atrasadas"
             value={isLoading ? "—" : overdueCount}
-            accent={overdueCount > 0}
             danger={overdueCount > 0}
           />
         </div>
@@ -96,10 +92,10 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-0 mb-10 border border-black">
           {/* Daily completions bar chart */}
           <div className="md:col-span-2 p-6 border-r border-black">
-            <p className="text-xs font-semibold tracking-widest uppercase text-gray-500 mb-1">
+            <p className="text-xs font-medium text-gray-400 mb-1">
               Últimos 7 dias
             </p>
-            <h2 className="text-xl font-black tracking-tight mb-6">Tarefas Concluídas</h2>
+            <h2 className="text-xl font-black tracking-tight mb-6">Tarefas concluídas</h2>
             {dailyData.length === 0 ? (
               <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
                 Nenhuma tarefa concluída esta semana
@@ -121,10 +117,10 @@ export default function Home() {
 
           {/* Status pie chart */}
           <div className="p-6">
-            <p className="text-xs font-semibold tracking-widest uppercase text-gray-500 mb-1">
+            <p className="text-xs font-medium text-gray-400 mb-1">
               Distribuição
             </p>
-            <h2 className="text-xl font-black tracking-tight mb-6">Por Status</h2>
+            <h2 className="text-xl font-black tracking-tight mb-6">Por status</h2>
             {statusData.length === 0 ? (
               <div className="flex items-center justify-center h-40 text-gray-400 text-sm">
                 Sem dados
@@ -161,10 +157,10 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-0 border border-black">
           {/* Priority distribution */}
           <div className="p-6 border-r border-black">
-            <p className="text-xs font-semibold tracking-widest uppercase text-gray-500 mb-1">
+            <p className="text-xs font-medium text-gray-400 mb-1">
               Distribuição
             </p>
-            <h2 className="text-xl font-black tracking-tight mb-6">Por Prioridade</h2>
+            <h2 className="text-xl font-black tracking-tight mb-6">Por prioridade</h2>
             {priorityData.length === 0 ? (
               <div className="text-gray-400 text-sm">Sem dados</div>
             ) : (
@@ -172,7 +168,7 @@ export default function Home() {
                 {priorityData.map((p) => (
                   <div key={p.name}>
                     <div className="flex justify-between text-xs mb-1">
-                      <span className="font-semibold uppercase tracking-wide">{p.name}</span>
+                      <span className="font-semibold text-gray-700">{p.name}</span>
                       <span className="font-bold">{p.value}</span>
                     </div>
                     <div className="h-2 bg-gray-100 w-full">
@@ -192,10 +188,10 @@ export default function Home() {
 
           {/* Overdue tasks */}
           <div className="p-6">
-            <p className="text-xs font-semibold tracking-widest uppercase text-[oklch(0.45_0.22_27)] mb-1">
+            <p className="text-xs font-medium text-[oklch(0.45_0.22_27)] mb-1">
               Atenção
             </p>
-            <h2 className="text-xl font-black tracking-tight mb-6">Tarefas Atrasadas</h2>
+            <h2 className="text-xl font-black tracking-tight mb-6">Tarefas atrasadas</h2>
             {(stats?.overdueTasks ?? []).length === 0 ? (
               <div className="flex items-center gap-2 text-gray-400 text-sm">
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -233,28 +229,22 @@ function StatCard({
   icon,
   label,
   value,
-  accent,
   danger,
 }: {
   icon: React.ReactNode;
   label: string;
   value: number | string;
-  accent: boolean;
   danger?: boolean;
 }) {
   return (
-    <div
-      className={`p-6 border-r border-black last:border-r-0 ${
-        accent ? "bg-[oklch(0.45_0.22_27)]" : "bg-white"
-      }`}
-    >
-      <div className={`mb-3 ${accent ? "text-white" : danger ? "text-[oklch(0.45_0.22_27)]" : "text-black"}`}>
+    <div className="p-6 border-r border-black last:border-r-0 bg-white">
+      <div className={`mb-3 ${danger ? "text-[oklch(0.45_0.22_27)]" : "text-gray-400"}`}>
         {icon}
       </div>
-      <p className={`text-3xl font-black tracking-tight ${accent ? "text-white" : "text-black"}`}>
+      <p className={`text-3xl font-black tracking-tight leading-none ${danger ? "text-[oklch(0.45_0.22_27)]" : "text-black"}`}>
         {value}
       </p>
-      <p className={`text-xs font-medium uppercase tracking-widest mt-1 ${accent ? "text-white/80" : "text-gray-500"}`}>
+      <p className="text-xs font-medium text-gray-500 mt-2 leading-snug">
         {label}
       </p>
     </div>

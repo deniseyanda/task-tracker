@@ -125,8 +125,8 @@ export default function Kanban() {
         <div className="px-6 md:px-10 pt-8 pb-6 border-b-2 border-black">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold tracking-widest uppercase text-[oklch(0.45_0.22_27)] mb-1">
-                Gestão Visual
+              <p className="text-xs font-medium text-[oklch(0.45_0.22_27)] mb-1">
+                Gestão visual
               </p>
               <h1 className="text-4xl font-black tracking-tight text-black">Kanban</h1>
             </div>
@@ -221,22 +221,22 @@ export default function Kanban() {
                 return (
                   <div
                     key={col.id}
-                    className={`flex flex-col w-72 shrink-0 ${colIdx < COLUMNS.length - 1 ? "border-r border-black" : ""} ${isDragTarget ? "bg-gray-50" : "bg-white"} transition-colors`}
+                    className={`flex flex-col w-72 shrink-0 ${colIdx < COLUMNS.length - 1 ? "border-r border-black" : ""} ${isDragTarget ? "bg-gray-100" : "bg-gray-50"} transition-colors`}
                     onDragOver={(e) => handleDragOver(e, col.id)}
                     onDragLeave={() => setDragOverCol(null)}
                     onDrop={(e) => handleDrop(e, col.id)}
                   >
                     {/* Column header */}
-                    <div className={`px-4 py-3 border-b border-black border-t-4 ${col.color} flex items-center justify-between`}>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-black uppercase tracking-widest">{col.label}</span>
-                        <span className="text-xs font-bold bg-black text-white px-1.5 py-0.5 min-w-5 text-center">
+                    <div className={`px-4 py-3 bg-white border-b border-black border-t-4 ${col.color} flex items-center justify-between gap-2`}>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-xs font-black truncate">{col.label}</span>
+                        <span className="text-xs font-bold bg-black text-white px-1.5 py-0.5 min-w-5 text-center shrink-0">
                           {colTasks.length}
                         </span>
                       </div>
                       <button
                         onClick={() => { setCreateStatus(col.id); setIsCreating(true); }}
-                        className="h-6 w-6 flex items-center justify-center hover:bg-gray-100 transition-colors"
+                        className="h-6 w-6 flex items-center justify-center hover:bg-gray-100 transition-colors shrink-0"
                       >
                         <Plus className="h-3.5 w-3.5" />
                       </button>
@@ -310,8 +310,8 @@ function TaskCard({
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      className={`bg-white border border-black p-3 cursor-grab active:cursor-grabbing transition-all group ${
-        isDragging ? "opacity-40 rotate-1" : "hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+      className={`bg-white border border-gray-200 p-3 cursor-grab active:cursor-grabbing transition-all group shadow-sm ${
+        isDragging ? "opacity-40 rotate-1 shadow-none" : "hover:border-black hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)]"
       } ${isOverdue ? "border-l-4 border-l-[oklch(0.45_0.22_27)]" : ""}`}
     >
       {/* Top row */}
@@ -523,7 +523,7 @@ function TaskModal({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Title */}
             <div>
-              <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">
+              <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">
                 Título *
               </Label>
               <Input
@@ -537,7 +537,7 @@ function TaskModal({
 
             {/* Description */}
             <div>
-              <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">
+              <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">
                 Descrição
               </Label>
               <Textarea
@@ -552,7 +552,7 @@ function TaskModal({
             {/* Row: Status + Priority */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Status</Label>
+                <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">Status</Label>
                 <Select value={status} onValueChange={(v) => setStatus(v as Status)}>
                   <SelectTrigger className="border-black text-sm">
                     <SelectValue />
@@ -566,7 +566,7 @@ function TaskModal({
                 </Select>
               </div>
               <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Prioridade</Label>
+                <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">Prioridade</Label>
                 <Select value={priority} onValueChange={(v) => setPriority(v as Priority)}>
                   <SelectTrigger className="border-black text-sm">
                     <SelectValue />
@@ -583,7 +583,7 @@ function TaskModal({
             {/* Row: Deadline + Estimated hours */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Prazo</Label>
+                <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">Prazo</Label>
                 <Input
                   type="date"
                   value={deadline}
@@ -592,7 +592,7 @@ function TaskModal({
                 />
               </div>
               <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Horas Estimadas</Label>
+                <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">Horas Estimadas</Label>
                 <Input
                   type="number"
                   value={estimatedHours}
@@ -607,7 +607,7 @@ function TaskModal({
             {/* Row: Project + Assignee */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Projeto</Label>
+                <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">Projeto</Label>
                 <Select value={projectId} onValueChange={setProjectId}>
                   <SelectTrigger className="border-black text-sm">
                     <SelectValue placeholder="Sem projeto" />
@@ -621,7 +621,7 @@ function TaskModal({
                 </Select>
               </div>
               <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Responsável</Label>
+                <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">Responsável</Label>
                 <Input
                   value={assignee}
                   onChange={(e) => setAssignee(e.target.value)}
@@ -633,7 +633,7 @@ function TaskModal({
 
             {/* Drive Client */}
             <div>
-              <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Cliente (Google Drive)</Label>
+              <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">Cliente (Google Drive)</Label>
               {driveClientName ? (
                 <div className="flex items-center gap-2 border border-black p-2">
                   <FolderOpen className="h-4 w-4 text-[oklch(0.45_0.22_27)] shrink-0" />
@@ -709,7 +709,7 @@ function TaskModal({
             {/* Tags */}
             {allTags.length > 0 && (
               <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Tags</Label>
+                <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">Tags</Label>
                 <div className="flex flex-wrap gap-1.5">
                   {allTags.map((tag) => {
                     const selected = selectedTags.includes(tag.id);
@@ -738,7 +738,7 @@ function TaskModal({
             {/* Subtasks (edit mode only) */}
             {isEdit && taskDetail && (
               <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Subtarefas</Label>
+                <Label className="text-xs font-semibold text-gray-600 mb-1.5 block">Subtarefas</Label>
                 <div className="space-y-1 mb-2">
                   {taskDetail.subtasks?.map((sub) => (
                     <div key={sub.id} className="flex items-center gap-2 group">
