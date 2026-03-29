@@ -90,6 +90,13 @@ export async function countUsers(): Promise<number> {
   return Number(row?.count ?? 0);
 }
 
+export async function hasAnyAdmin(): Promise<boolean> {
+  const db = await getDb();
+  if (!db) return false;
+  const result = await db.select({ id: users.id }).from(users).where(eq(users.role, "admin")).limit(1);
+  return result.length > 0;
+}
+
 export async function createEmailUser(data: {
   openId: string;
   name: string;

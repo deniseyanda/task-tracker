@@ -14,7 +14,7 @@ import { ENV } from "./_core/env";
 import crypto from "crypto";
 import { nanoid } from "nanoid";
 import {
-  countUsers, createEmailUser, createNotification,
+  countUsers, hasAnyAdmin, createEmailUser, createNotification,
   createProject, createSubtask, createTag, createTask,
   deleteProject, deleteSubtask, deleteTag, deleteTask,
   getDashboardStats, getOverdueTasks, getTask, getTasksDueSoon,
@@ -474,7 +474,7 @@ export const appRouter = router({
         if (existing) {
           throw new TRPCError({ code: "CONFLICT", message: "Este email já está cadastrado" });
         }
-        const isFirstUser = (await countUsers()) === 0;
+        const isFirstUser = !(await hasAnyAdmin());
         const openId = `email_${nanoid()}`;
         await createEmailUser({
           openId,
