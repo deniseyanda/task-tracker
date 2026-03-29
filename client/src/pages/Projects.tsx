@@ -35,56 +35,63 @@ export default function Projects() {
     <DashboardLayout>
       <div className="p-6 md:p-10 max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-10 border-b-2 border-black pb-6 flex items-end justify-between">
+        <div className="mb-10 border-b border-gray-100 pb-6 flex items-end justify-between">
           <div>
-            <p className="text-xs font-semibold tracking-widest uppercase text-[oklch(0.45_0.22_27)] mb-1">
+            <p className="text-[10px] font-medium tracking-wider text-[oklch(0.55_0.15_27)] mb-1.5">
               Organização
             </p>
             <h1 className="text-4xl font-black tracking-tight text-black">Projetos</h1>
           </div>
           <Button
             onClick={() => setIsCreating(true)}
-            className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] text-xs font-bold uppercase tracking-wide"
+            className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] text-sm font-semibold"
           >
-            <Plus className="h-4 w-4 mr-1" />
-            Novo Projeto
+            <Plus className="h-4 w-4 mr-1.5" />
+            Novo projeto
           </Button>
         </div>
 
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
+            <Loader2 className="h-8 w-8 animate-spin text-gray-200" />
           </div>
         ) : projects.length === 0 ? (
-          <div className="border-2 border-dashed border-gray-200 p-16 text-center">
-            <FolderOpen className="h-12 w-12 text-gray-200 mx-auto mb-4" />
-            <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest">
-              Nenhum projeto criado
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-20 h-20 rounded-2xl bg-gray-50 flex items-center justify-center mb-5 shadow-sm">
+              <FolderOpen className="h-10 w-10 text-gray-300" />
+            </div>
+            <h3 className="text-base font-bold text-gray-700 mb-1.5">Nenhum projeto ainda</h3>
+            <p className="text-sm text-gray-400 mb-6 max-w-xs leading-relaxed">
+              Crie seu primeiro projeto para agrupar e organizar suas tarefas
             </p>
-            <p className="text-xs text-gray-300 mt-1">Crie seu primeiro projeto para organizar suas tarefas</p>
+            <Button
+              onClick={() => setIsCreating(true)}
+              className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] text-sm font-semibold"
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              Criar primeiro projeto
+            </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0 border border-black">
-            {projects.map((project, idx) => {
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {projects.map((project) => {
               const count = taskCountByProject(project.id);
               return (
                 <div
                   key={project.id}
-                  className={`p-6 border-b border-r border-black group hover:bg-gray-50 transition-colors ${
-                    (idx + 1) % 3 === 0 ? "border-r-0" : ""
-                  }`}
+                  className="p-5 rounded-xl border border-gray-100 bg-white shadow-sm group hover:shadow-md hover:border-gray-200 transition-all"
                 >
-                  <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-start justify-between mb-3">
                     <div
-                      className="w-4 h-4 shrink-0 mt-0.5"
+                      className="w-3.5 h-3.5 rounded-sm shrink-0 mt-1"
                       style={{ backgroundColor: project.color }}
                     />
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={() => setEditing(project as Project)}
-                        className="h-7 w-7 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                        className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors"
                       >
-                        <Pencil className="h-3.5 w-3.5 text-gray-500" />
+                        <Pencil className="h-3.5 w-3.5 text-gray-400" />
                       </button>
                       <button
                         onClick={() => {
@@ -92,19 +99,19 @@ export default function Projects() {
                             deleteProject.mutate({ id: project.id });
                           }
                         }}
-                        className="h-7 w-7 flex items-center justify-center hover:bg-gray-200 transition-colors"
+                        className="h-7 w-7 flex items-center justify-center rounded-md hover:bg-gray-100 transition-colors"
                       >
                         <Trash2 className="h-3.5 w-3.5 text-[oklch(0.45_0.22_27)]" />
                       </button>
                     </div>
                   </div>
-                  <h3 className="text-lg font-black tracking-tight text-black mb-1">{project.name}</h3>
+                  <h3 className="text-base font-bold tracking-tight text-black mb-1">{project.name}</h3>
                   {project.description && (
-                    <p className="text-xs text-gray-500 leading-relaxed mb-3 line-clamp-2">{project.description}</p>
+                    <p className="text-xs text-gray-400 leading-relaxed mb-3 line-clamp-2">{project.description}</p>
                   )}
-                  <div className="flex items-center gap-1 mt-auto">
-                    <span className="text-xs font-bold text-black">{count}</span>
-                    <span className="text-xs text-gray-400 uppercase tracking-wide">
+                  <div className="flex items-center gap-1 mt-2">
+                    <span className="text-xs font-semibold text-gray-600">{count}</span>
+                    <span className="text-xs text-gray-400">
                       {count === 1 ? "tarefa" : "tarefas"}
                     </span>
                   </div>
@@ -172,55 +179,54 @@ function ProjectModal({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md border-2 border-black p-0">
-        <div className="h-1.5 w-full bg-[oklch(0.45_0.22_27)]" />
+      <DialogContent className="max-w-md border border-gray-100 shadow-xl p-0">
+        <div className="h-1 w-full bg-[oklch(0.45_0.22_27)] rounded-t-lg" />
         <div className="p-6">
-          <DialogHeader className="mb-6">
-            <DialogTitle className="text-2xl font-black tracking-tight">
-              {isEdit ? "Editar Projeto" : "Novo Projeto"}
+          <DialogHeader className="mb-5">
+            <DialogTitle className="text-xl font-bold tracking-tight">
+              {isEdit ? "Editar projeto" : "Novo projeto"}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Nome *</Label>
+              <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">Nome *</Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Nome do projeto"
-                className="border-black"
                 required
               />
             </div>
             <div>
-              <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Descrição</Label>
+              <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">Descrição</Label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Descrição opcional..."
-                className="border-black resize-none"
+                className="resize-none"
                 rows={3}
               />
             </div>
             <div>
-              <Label className="text-xs font-bold uppercase tracking-widest mb-2 block">Cor</Label>
+              <Label className="text-xs font-semibold text-gray-500 mb-2 block">Cor</Label>
               <div className="flex flex-wrap gap-2">
                 {PRESET_COLORS.map((c) => (
                   <button
                     key={c}
                     type="button"
                     onClick={() => setColor(c)}
-                    className={`w-7 h-7 transition-all ${color === c ? "ring-2 ring-offset-2 ring-black scale-110" : ""}`}
+                    className={`w-7 h-7 rounded-md transition-all ${color === c ? "ring-2 ring-offset-2 ring-black scale-110" : ""}`}
                     style={{ backgroundColor: c }}
                   />
                 ))}
               </div>
             </div>
-            <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
-              <Button type="button" variant="outline" onClick={onClose} className="border-black">Cancelar</Button>
+            <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+              <Button type="button" variant="outline" onClick={onClose}>Cancelar</Button>
               <Button
                 type="submit"
                 disabled={isPending || !name.trim()}
-                className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] font-bold uppercase tracking-wide"
+                className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] font-semibold"
               >
                 {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : isEdit ? "Salvar" : "Criar"}
               </Button>

@@ -15,9 +15,9 @@ type Priority = "baixa" | "media" | "alta";
 
 const COLUMNS: { id: Status; label: string; color: string }[] = [
   { id: "backlog", label: "Backlog", color: "border-t-gray-400" },
-  { id: "em_andamento", label: "Em Andamento", color: "border-t-black" },
-  { id: "concluido", label: "Concluído", color: "border-t-[oklch(0.45_0.22_27)]" },
-  { id: "bloqueado", label: "Bloqueado", color: "border-t-gray-500" },
+  { id: "em_andamento", label: "Em andamento", color: "border-t-blue-500" },
+  { id: "concluido", label: "Concluído", color: "border-t-green-500" },
+  { id: "bloqueado", label: "Bloqueado", color: "border-t-red-500" },
 ];
 
 const PRIORITY_STYLES: Record<Priority, string> = {
@@ -245,8 +245,10 @@ export default function Kanban() {
                     {/* Tasks */}
                     <div className="flex-1 overflow-y-auto p-3 space-y-2">
                       {colTasks.length === 0 && (
-                        <div className={`border-2 border-dashed ${isDragTarget ? "border-[oklch(0.45_0.22_27)]" : "border-gray-200"} p-4 text-center text-xs text-gray-400 transition-colors`}>
-                          {isDragTarget ? "Soltar aqui" : "Sem tarefas"}
+                        <div className={`border border-dashed rounded-md ${isDragTarget ? "border-[oklch(0.45_0.22_27)]/50 bg-[oklch(0.45_0.22_27)]/5" : "border-gray-200"} p-5 text-center transition-colors`}>
+                          <p className={`text-xs ${isDragTarget ? "text-[oklch(0.45_0.22_27)]" : "text-gray-300"}`}>
+                            {isDragTarget ? "Soltar aqui" : "Nenhuma tarefa"}
+                          </p>
                         </div>
                       )}
                       {colTasks.map((task) => (
@@ -310,9 +312,9 @@ function TaskCard({
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      className={`bg-white border border-gray-200 p-3 cursor-grab active:cursor-grabbing transition-all group shadow-sm ${
-        isDragging ? "opacity-40 rotate-1 shadow-none" : "hover:border-black hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,0.8)]"
-      } ${isOverdue ? "border-l-4 border-l-[oklch(0.45_0.22_27)]" : ""}`}
+      className={`bg-white border border-gray-100 p-3 rounded-lg cursor-grab active:cursor-grabbing transition-all group shadow-sm ${
+        isDragging ? "opacity-40 rotate-1 shadow-none" : "hover:border-gray-300 hover:shadow-md"
+      } ${isOverdue ? "border-l-4 border-l-[oklch(0.45_0.22_27)] rounded-l-none" : ""}`}
     >
       {/* Top row */}
       <div className="flex items-start justify-between gap-2 mb-2">

@@ -22,16 +22,28 @@ import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
 import NotificationBell from "./NotificationBell";
 import { Button } from "./ui/button";
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", path: "/" },
-  { icon: Trello, label: "Kanban", path: "/kanban" },
-  { icon: FolderOpen, label: "Projetos", path: "/projetos" },
-  { icon: Tag, label: "Tags", path: "/tags" },
-  { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
-  { icon: Bot, label: "Assistente IA", path: "/assistente" },
-  { icon: Users, label: "Clientes", path: "/clientes" },
-  { icon: UserCog, label: "Colaboradores", path: "/colaboradores" },
-  { icon: Upload, label: "Importar", path: "/importar" },
+const menuGroups = [
+  {
+    items: [
+      { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+      { icon: Trello, label: "Kanban", path: "/kanban" },
+      { icon: FolderOpen, label: "Projetos", path: "/projetos" },
+      { icon: Tag, label: "Tags", path: "/tags" },
+    ],
+  },
+  {
+    items: [
+      { icon: BarChart3, label: "Relatórios", path: "/relatorios" },
+      { icon: Bot, label: "Assistente IA", path: "/assistente" },
+      { icon: Users, label: "Clientes", path: "/clientes" },
+    ],
+  },
+  {
+    items: [
+      { icon: UserCog, label: "Colaboradores", path: "/colaboradores" },
+      { icon: Upload, label: "Importar", path: "/importar" },
+    ],
+  },
 ];
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
@@ -105,7 +117,8 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
-  const activeMenuItem = menuItems.find((item) => item.path === location);
+  const allMenuItems = menuGroups.flatMap((g) => g.items);
+  const activeMenuItem = allMenuItems.find((item) => item.path === location);
 
   // Keep as fallback for programmatic navigation / browser back-forward.
   useEffect(() => {
@@ -161,29 +174,36 @@ function DashboardLayoutContent({
           </SidebarHeader>
 
           {/* Nav */}
-          <SidebarContent className="gap-0 pt-4">
-            <SidebarMenu className="px-2 gap-0.5">
-              {menuItems.map((item) => {
-                const isActive = location === item.path;
-                return (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton
-                      isActive={isActive}
-                      onClick={() => { setOpenMobile(false); startTransition(() => setLocation(item.path)); }}
-                      tooltip={item.label}
-                      className={`h-9 transition-all font-medium text-xs tracking-wide uppercase ${
-                        isActive
-                          ? "bg-[oklch(0.45_0.22_27)] text-white hover:bg-[oklch(0.45_0.22_27)]"
-                          : "text-[oklch(0.7_0_0)] hover:bg-[oklch(0.2_0_0)] hover:text-white"
-                      }`}
-                    >
-                      <item.icon className="h-4 w-4 shrink-0" />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
+          <SidebarContent className="gap-0 pt-3">
+            {menuGroups.map((group, groupIdx) => (
+              <div key={groupIdx}>
+                {groupIdx > 0 && (
+                  <div className="mx-3 my-2 h-px bg-[oklch(0.18_0_0)]" />
+                )}
+                <SidebarMenu className="px-2 gap-0.5">
+                  {group.items.map((item) => {
+                    const isActive = location === item.path;
+                    return (
+                      <SidebarMenuItem key={item.path}>
+                        <SidebarMenuButton
+                          isActive={isActive}
+                          onClick={() => { setOpenMobile(false); startTransition(() => setLocation(item.path)); }}
+                          tooltip={item.label}
+                          className={`h-10 rounded-md transition-all font-medium text-xs ${
+                            isActive
+                              ? "bg-[oklch(0.45_0.22_27)] text-white hover:bg-[oklch(0.45_0.22_27)]"
+                              : "text-[oklch(0.65_0_0)] hover:bg-[oklch(0.45_0.22_27)]/20 hover:text-[oklch(0.92_0_0)]"
+                          }`}
+                        >
+                          <item.icon className="h-4 w-4 shrink-0" />
+                          <span>{item.label}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </div>
+            ))}
           </SidebarContent>
 
           {/* Footer */}

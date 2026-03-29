@@ -37,40 +37,53 @@ export default function Tags() {
   return (
     <DashboardLayout>
       <div className="p-6 md:p-10 max-w-3xl mx-auto">
-        <div className="mb-10 border-b-2 border-black pb-6 flex items-end justify-between">
+        {/* Header */}
+        <div className="mb-10 border-b border-gray-100 pb-6 flex items-end justify-between">
           <div>
-            <p className="text-xs font-semibold tracking-widest uppercase text-[oklch(0.45_0.22_27)] mb-1">
+            <p className="text-[10px] font-medium tracking-wider text-[oklch(0.55_0.15_27)] mb-1.5">
               Classificação
             </p>
             <h1 className="text-4xl font-black tracking-tight text-black">Tags</h1>
           </div>
           <Button
             onClick={() => setIsCreating(true)}
-            className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] text-xs font-bold uppercase tracking-wide"
+            className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] text-sm font-semibold"
           >
-            <Plus className="h-4 w-4 mr-1" />
-            Nova Tag
+            <Plus className="h-4 w-4 mr-1.5" />
+            Nova tag
           </Button>
         </div>
 
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-300" />
+            <Loader2 className="h-8 w-8 animate-spin text-gray-200" />
           </div>
         ) : tags.length === 0 ? (
-          <div className="border-2 border-dashed border-gray-200 p-16 text-center">
-            <Tag className="h-12 w-12 text-gray-200 mx-auto mb-4" />
-            <p className="text-sm font-semibold text-gray-400 uppercase tracking-widest">Nenhuma tag criada</p>
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-20 h-20 rounded-2xl bg-gray-50 flex items-center justify-center mb-5 shadow-sm">
+              <Tag className="h-10 w-10 text-gray-300" />
+            </div>
+            <h3 className="text-base font-bold text-gray-700 mb-1.5">Nenhuma tag ainda</h3>
+            <p className="text-sm text-gray-400 mb-6 max-w-xs leading-relaxed">
+              Crie tags para categorizar e filtrar suas tarefas rapidamente
+            </p>
+            <Button
+              onClick={() => setIsCreating(true)}
+              className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] text-sm font-semibold"
+            >
+              <Plus className="h-4 w-4 mr-1.5" />
+              Criar primeira tag
+            </Button>
           </div>
         ) : (
           <div className="flex flex-wrap gap-3">
             {tags.map((tag) => (
               <div
                 key={tag.id}
-                className="flex items-center gap-2 border px-3 py-2 group"
+                className="flex items-center gap-2 border rounded-lg px-3 py-2 group shadow-sm hover:shadow-md transition-shadow bg-white"
                 style={{ borderColor: tag.color }}
               >
-                <div className="w-2.5 h-2.5 shrink-0" style={{ backgroundColor: tag.color }} />
+                <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: tag.color }} />
                 <span className="text-sm font-semibold" style={{ color: tag.color }}>{tag.name}</span>
                 <button
                   onClick={() => {
@@ -87,11 +100,11 @@ export default function Tags() {
       </div>
 
       <Dialog open={isCreating} onOpenChange={(v) => !v && setIsCreating(false)}>
-        <DialogContent className="max-w-sm border-2 border-black p-0">
-          <div className="h-1.5 w-full bg-[oklch(0.45_0.22_27)]" />
+        <DialogContent className="max-w-sm border border-gray-100 shadow-xl p-0">
+          <div className="h-1 w-full bg-[oklch(0.45_0.22_27)] rounded-t-lg" />
           <div className="p-6">
-            <DialogHeader className="mb-6">
-              <DialogTitle className="text-2xl font-black tracking-tight">Nova Tag</DialogTitle>
+            <DialogHeader className="mb-5">
+              <DialogTitle className="text-xl font-bold tracking-tight">Nova tag</DialogTitle>
             </DialogHeader>
             <form
               onSubmit={(e) => {
@@ -102,47 +115,45 @@ export default function Tags() {
               className="space-y-4"
             >
               <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-1.5 block">Nome *</Label>
+                <Label className="text-xs font-semibold text-gray-500 mb-1.5 block">Nome *</Label>
                 <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Ex: Urgente, Design, Dev..."
-                  className="border-black"
                   required
                 />
               </div>
               <div>
-                <Label className="text-xs font-bold uppercase tracking-widest mb-2 block">Cor</Label>
+                <Label className="text-xs font-semibold text-gray-500 mb-2 block">Cor</Label>
                 <div className="flex flex-wrap gap-2">
                   {PRESET_COLORS.map((c) => (
                     <button
                       key={c}
                       type="button"
                       onClick={() => setColor(c)}
-                      className={`w-7 h-7 transition-all ${color === c ? "ring-2 ring-offset-2 ring-black scale-110" : ""}`}
+                      className={`w-7 h-7 rounded-md transition-all ${color === c ? "ring-2 ring-offset-2 ring-black scale-110" : ""}`}
                       style={{ backgroundColor: c }}
                     />
                   ))}
                 </div>
               </div>
-              {/* Preview */}
               {name && (
-                <div className="flex items-center gap-2 p-3 bg-gray-50">
+                <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                   <span className="text-xs text-gray-500">Prévia:</span>
-                  <div className="flex items-center gap-1.5 border px-2 py-1" style={{ borderColor: color }}>
-                    <div className="w-2 h-2" style={{ backgroundColor: color }} />
+                  <div className="flex items-center gap-1.5 border rounded-md px-2 py-1" style={{ borderColor: color }}>
+                    <div className="w-2 h-2 rounded-sm" style={{ backgroundColor: color }} />
                     <span className="text-xs font-semibold" style={{ color }}>{name}</span>
                   </div>
                 </div>
               )}
-              <div className="flex justify-end gap-2 pt-2 border-t border-gray-200">
-                <Button type="button" variant="outline" onClick={() => setIsCreating(false)} className="border-black">
+              <div className="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                <Button type="button" variant="outline" onClick={() => setIsCreating(false)}>
                   Cancelar
                 </Button>
                 <Button
                   type="submit"
                   disabled={create.isPending || !name.trim()}
-                  className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] font-bold uppercase tracking-wide"
+                  className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] font-semibold"
                 >
                   {create.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Criar"}
                 </Button>
