@@ -21,9 +21,9 @@ const COLUMNS: { id: Status; label: string; color: string }[] = [
 ];
 
 const PRIORITY_STYLES: Record<Priority, string> = {
-  alta: "bg-[oklch(0.45_0.22_27)] text-white",
-  media: "bg-black text-white",
-  baixa: "bg-gray-100 text-gray-600",
+  alta: "bg-[oklch(0.45_0.22_27)] text-white dark:bg-rose-500/20 dark:text-rose-300",
+  media: "bg-black text-white dark:bg-violet-500/20 dark:text-violet-300",
+  baixa: "bg-gray-100 text-gray-600 dark:bg-white/[0.06] dark:text-gray-400",
 };
 
 const PRIORITY_LABELS: Record<Priority, string> = {
@@ -122,13 +122,13 @@ export default function Kanban() {
     <DashboardLayout>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="px-6 md:px-10 pt-8 pb-6 border-b-2 border-black">
+        <div className="px-6 md:px-10 pt-8 pb-6 border-b-2 border-black dark:border-white/[0.06]">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-              <p className="text-xs font-medium text-[oklch(0.45_0.22_27)] mb-1">
+              <p className="text-xs font-medium text-[oklch(0.45_0.22_27)] dark:text-violet-400 mb-1">
                 Gestão visual
               </p>
-              <h1 className="text-4xl font-black tracking-tight text-black">Kanban</h1>
+              <h1 className="text-4xl font-black tracking-tight text-black dark:text-white">Kanban</h1>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {/* Search */}
@@ -138,7 +138,7 @@ export default function Kanban() {
                   placeholder="Buscar tarefas..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-8 h-9 text-sm w-48 border-black"
+                  className="pl-8 h-9 text-sm w-48 border-black dark:border-white/[0.1] dark:bg-white/[0.04] dark:placeholder:text-gray-500"
                 />
               </div>
               {/* Project filter */}
@@ -189,7 +189,7 @@ export default function Kanban() {
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="h-9 px-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide border border-[oklch(0.45_0.22_27)] text-[oklch(0.45_0.22_27)] hover:bg-[oklch(0.45_0.22_27)] hover:text-white transition-colors"
+                  className="h-9 px-3 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide border border-[oklch(0.45_0.22_27)] dark:border-violet-500 text-[oklch(0.45_0.22_27)] dark:text-violet-400 hover:bg-[oklch(0.45_0.22_27)] dark:hover:bg-violet-500/20 hover:text-white transition-colors"
                   title="Limpar todos os filtros"
                 >
                   <X className="h-3.5 w-3.5" />
@@ -198,7 +198,7 @@ export default function Kanban() {
               )}
               <Button
                 onClick={() => { setCreateStatus("backlog"); setIsCreating(true); }}
-                className="h-9 bg-black text-white hover:bg-[oklch(0.45_0.22_27)] text-xs font-bold uppercase tracking-wide"
+                className="h-9 bg-black text-white hover:bg-[oklch(0.45_0.22_27)] dark:bg-violet-600 dark:hover:bg-violet-700 text-xs font-bold uppercase tracking-wide"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Nova Tarefa
@@ -214,29 +214,29 @@ export default function Kanban() {
           </div>
         ) : (
           <div className="flex-1 overflow-x-auto p-6 md:p-10">
-            <div className="flex gap-0 min-w-max h-full border border-black">
+            <div className="kanban-board flex gap-0 min-w-max h-full border border-black dark:border-white/[0.06]">
               {COLUMNS.map((col, colIdx) => {
                 const colTasks = tasksByStatus(col.id);
                 const isDragTarget = dragOverCol === col.id;
                 return (
                   <div
                     key={col.id}
-                    className={`flex flex-col w-72 shrink-0 ${colIdx < COLUMNS.length - 1 ? "border-r border-black" : ""} ${isDragTarget ? "bg-gray-100" : "bg-gray-50"} transition-colors`}
+                    className={`kanban-column flex flex-col w-72 shrink-0 ${colIdx < COLUMNS.length - 1 ? "border-r border-black dark:border-r-white/[0.06]" : ""} ${isDragTarget ? "bg-gray-100 dark:bg-white/[0.05]" : "bg-gray-50"} transition-colors`}
                     onDragOver={(e) => handleDragOver(e, col.id)}
                     onDragLeave={() => setDragOverCol(null)}
                     onDrop={(e) => handleDrop(e, col.id)}
                   >
                     {/* Column header */}
-                    <div className={`px-4 py-3 bg-white border-b border-black border-t-4 ${col.color} flex items-center justify-between gap-2`}>
+                    <div className={`kanban-column-header px-4 py-3 bg-white dark:bg-transparent border-b border-black dark:border-b-white/[0.06] border-t-4 ${col.color} flex items-center justify-between gap-2`}>
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-xs font-black truncate">{col.label}</span>
-                        <span className="text-xs font-bold bg-black text-white px-1.5 py-0.5 min-w-5 text-center shrink-0">
+                        <span className="text-xs font-black truncate dark:text-white/90">{col.label}</span>
+                        <span className="text-xs font-bold bg-black text-white dark:bg-white/[0.1] dark:text-white/60 px-1.5 py-0.5 min-w-5 text-center shrink-0 rounded">
                           {colTasks.length}
                         </span>
                       </div>
                       <button
                         onClick={() => { setCreateStatus(col.id); setIsCreating(true); }}
-                        className="h-6 w-6 flex items-center justify-center hover:bg-gray-100 transition-colors shrink-0"
+                        className="h-6 w-6 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors shrink-0 rounded text-gray-500 dark:text-gray-400"
                       >
                         <Plus className="h-3.5 w-3.5" />
                       </button>
@@ -245,8 +245,8 @@ export default function Kanban() {
                     {/* Tasks */}
                     <div className="flex-1 overflow-y-auto p-3 space-y-2">
                       {colTasks.length === 0 && (
-                        <div className={`border border-dashed rounded-md ${isDragTarget ? "border-[oklch(0.45_0.22_27)]/50 bg-[oklch(0.45_0.22_27)]/5" : "border-gray-200"} p-5 text-center transition-colors`}>
-                          <p className={`text-xs ${isDragTarget ? "text-[oklch(0.45_0.22_27)]" : "text-gray-300"}`}>
+                        <div className={`border border-dashed rounded-md ${isDragTarget ? "border-[oklch(0.45_0.22_27)]/50 dark:border-violet-500/40 bg-[oklch(0.45_0.22_27)]/5 dark:bg-violet-500/5" : "border-gray-200 dark:border-white/[0.08]"} p-5 text-center transition-colors`}>
+                          <p className={`text-xs ${isDragTarget ? "text-[oklch(0.45_0.22_27)] dark:text-violet-400" : "text-gray-300 dark:text-gray-600"}`}>
                             {isDragTarget ? "Soltar aqui" : "Nenhuma tarefa"}
                           </p>
                         </div>
@@ -312,14 +312,14 @@ function TaskCard({
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      className={`bg-white border border-gray-100 p-3 rounded-lg cursor-grab active:cursor-grabbing transition-all group shadow-sm ${
+      className={`kanban-card bg-white border border-gray-100 p-3 rounded-lg cursor-grab active:cursor-grabbing transition-all group shadow-sm ${
         isDragging ? "opacity-40 rotate-1 shadow-none" : "hover:border-gray-300 hover:shadow-md"
-      } ${isOverdue ? "border-l-4 border-l-[oklch(0.45_0.22_27)] rounded-l-none" : ""}`}
+      } ${isOverdue ? "border-l-4 border-l-[oklch(0.45_0.22_27)] dark:border-l-rose-500 rounded-l-none" : ""}`}
     >
       {/* Top row */}
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex items-center gap-1.5">
-          <GripVertical className="h-3.5 w-3.5 text-gray-300 shrink-0" />
+          <GripVertical className="h-3.5 w-3.5 text-gray-300 dark:text-gray-600 shrink-0" />
           <span
             className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 ${PRIORITY_STYLES[task.priority]}`}
           >
@@ -329,13 +329,13 @@ function TaskCard({
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={onEdit}
-            className="h-5 w-5 flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-black transition-colors text-xs"
+            className="h-5 w-5 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/[0.08] text-gray-400 hover:text-black dark:hover:text-white transition-colors text-xs"
           >
             ✎
           </button>
           <button
             onClick={onDelete}
-            className="h-5 w-5 flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-[oklch(0.45_0.22_27)] transition-colors"
+            className="h-5 w-5 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-white/[0.08] text-gray-400 hover:text-[oklch(0.45_0.22_27)] dark:hover:text-rose-400 transition-colors"
           >
             <Trash2 className="h-3 w-3" />
           </button>
@@ -344,7 +344,7 @@ function TaskCard({
 
       {/* Title */}
       <p
-        className="text-sm font-semibold text-black leading-snug mb-2 cursor-pointer hover:text-[oklch(0.45_0.22_27)] transition-colors"
+        className="text-sm font-semibold text-black dark:text-white/90 leading-snug mb-2 cursor-pointer hover:text-[oklch(0.45_0.22_27)] dark:hover:text-violet-400 transition-colors"
         onClick={onEdit}
       >
         {task.title}
@@ -352,7 +352,7 @@ function TaskCard({
 
       {/* Description */}
       {task.description && (
-        <p className="text-xs text-gray-500 leading-relaxed mb-2 line-clamp-2">{task.description}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-2 line-clamp-2">{task.description}</p>
       )}
 
       {/* Tags */}
@@ -371,9 +371,9 @@ function TaskCard({
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100">
+      <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100 dark:border-white/[0.07]">
         {task.deadline ? (
-          <span className={`flex items-center gap-1 text-[10px] font-medium ${isOverdue ? "text-[oklch(0.45_0.22_27)]" : "text-gray-500"}`}>
+          <span className={`flex items-center gap-1 text-[10px] font-medium ${isOverdue ? "text-[oklch(0.45_0.22_27)] dark:text-rose-400" : "text-gray-500 dark:text-gray-500"}`}>
             {isOverdue ? <AlertTriangle className="h-3 w-3" /> : <Calendar className="h-3 w-3" />}
             {new Date(task.deadline).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
           </span>
@@ -381,7 +381,7 @@ function TaskCard({
           <span />
         )}
         {task.assignee && (
-          <span className="text-[10px] text-gray-400 font-medium truncate max-w-20">{task.assignee}</span>
+          <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium truncate max-w-20">{task.assignee}</span>
         )}
       </div>
     </div>
@@ -512,12 +512,12 @@ function TaskModal({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-black p-0">
-        {/* Red top bar */}
-        <div className="h-1.5 w-full bg-[oklch(0.45_0.22_27)]" />
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-2 border-black dark:border-white/[0.1] p-0">
+        {/* Accent top bar */}
+        <div className="h-1.5 w-full bg-[oklch(0.45_0.22_27)] dark:bg-violet-600" />
         <div className="p-6">
           <DialogHeader className="mb-6">
-            <DialogTitle className="text-2xl font-black tracking-tight">
+            <DialogTitle className="text-2xl font-black tracking-tight dark:text-white">
               {isEdit ? "Editar Tarefa" : "Nova Tarefa"}
             </DialogTitle>
           </DialogHeader>
@@ -779,7 +779,7 @@ function TaskModal({
             )}
 
             {/* Actions */}
-            <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+            <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-white/[0.07]">
               {isEdit && task && deadline && (
                 <Button
                   type="button"

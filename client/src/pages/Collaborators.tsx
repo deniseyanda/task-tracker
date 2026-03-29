@@ -187,17 +187,17 @@ export default function Collaborators() {
     <DashboardLayout>
       <div className="px-6 md:px-10 pt-8 pb-10 max-w-5xl">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 border-b-2 border-black pb-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 border-b-2 border-black dark:border-white/[0.06] pb-6">
           <div>
-            <p className="text-xs font-semibold tracking-widest uppercase text-[oklch(0.45_0.22_27)] mb-1">
+            <p className="text-[10px] font-medium tracking-wider text-[oklch(0.55_0.15_27)] dark:text-violet-400/70 mb-1.5">
               Equipe
             </p>
-            <h1 className="text-4xl font-black tracking-tight text-black">Colaboradores</h1>
+            <h1 className="text-4xl font-black tracking-tight text-black dark:text-white">Colaboradores</h1>
           </div>
           {canManage && (
             <Button
               onClick={() => { setShowInviteModal(true); setInviteLink(null); }}
-              className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] text-xs font-bold uppercase tracking-widest h-10 px-5"
+              className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] dark:bg-violet-600 dark:hover:bg-violet-700 text-xs font-bold uppercase tracking-widest h-10 px-5"
             >
               <UserPlus className="h-4 w-4 mr-2" />
               Convidar Colaborador
@@ -207,15 +207,15 @@ export default function Collaborators() {
 
         {/* Permission matrix legend */}
         <div className="mb-8">
-          <p className="text-xs font-black uppercase tracking-widest mb-3">Níveis de Acesso</p>
+          <p className="text-xs font-black uppercase tracking-widest mb-3 dark:text-white/80">Níveis de Acesso</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {(Object.entries(ROLE_CONFIG) as [CollabRole, typeof ROLE_CONFIG[CollabRole]][]).map(
               ([role, cfg]) => (
-                <div key={role} className="border border-black p-4">
+                <div key={role} className="border border-black dark:border-white/[0.07] p-4 dark:bg-white/[0.02] rounded-lg">
                   <div className="mb-2">
                     <RoleBadge role={role} />
                   </div>
-                  <p className="text-xs text-gray-500 leading-relaxed">{cfg.description}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{cfg.description}</p>
                 </div>
               )
             )}
@@ -224,7 +224,7 @@ export default function Collaborators() {
 
         {/* Collaborators list */}
         <div className="mb-8">
-          <p className="text-xs font-black uppercase tracking-widest mb-3 border-b border-black pb-2">
+          <p className="text-xs font-black uppercase tracking-widest mb-3 border-b border-black dark:border-white/[0.07] pb-2 dark:text-white/80">
             Membros Ativos ({collaborators.length})
           </p>
           {isLoading ? (
@@ -240,8 +240,8 @@ export default function Collaborators() {
               </p>
             </div>
           ) : (
-            <div className="border border-black">
-              <div className="grid grid-cols-12 px-4 py-2 bg-black text-white text-[10px] font-bold uppercase tracking-widest">
+            <div className="border border-black dark:border-white/[0.07] rounded-lg overflow-hidden">
+              <div className="grid grid-cols-12 px-4 py-2 bg-black dark:bg-white/[0.05] text-white text-[10px] font-bold uppercase tracking-widest">
                 <div className="col-span-4">Nome</div>
                 <div className="col-span-3">Email</div>
                 <div className="col-span-2">Nível</div>
@@ -251,14 +251,14 @@ export default function Collaborators() {
               {collaborators.map((collab, idx) => (
                 <div
                   key={collab.id}
-                  className={`grid grid-cols-12 px-4 py-3 items-center border-b border-gray-100 last:border-b-0 ${
-                    idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
+                  className={`grid grid-cols-12 px-4 py-3 items-center border-b border-gray-100 dark:border-white/[0.05] last:border-b-0 ${
+                    idx % 2 === 0 ? "bg-white dark:bg-transparent" : "bg-gray-50/50 dark:bg-white/[0.02]"
                   }`}
                 >
-                  <div className="col-span-4 font-semibold text-sm truncate">
+                  <div className="col-span-4 font-semibold text-sm truncate dark:text-white/90">
                     {collab.name ?? "—"}
                   </div>
-                  <div className="col-span-3 text-xs text-gray-500 truncate flex items-center gap-1">
+                  <div className="col-span-3 text-xs text-gray-500 dark:text-gray-400 truncate flex items-center gap-1">
                     <Mail className="h-3 w-3 shrink-0" />
                     {collab.email ?? "—"}
                   </div>
@@ -303,7 +303,7 @@ export default function Collaborators() {
                       <RoleBadge role={collab.role ?? "operador"} />
                     )}
                   </div>
-                  <div className="col-span-2 text-xs text-gray-400">
+                  <div className="col-span-2 text-xs text-gray-400 dark:text-gray-500">
                     {collab.lastSignedIn
                       ? new Date(collab.lastSignedIn).toLocaleDateString("pt-BR")
                       : "—"}
@@ -395,7 +395,7 @@ export default function Collaborators() {
       {/* System users section — visible only to system admin */}
       {isSystemAdmin && (
         <div className="px-6 md:px-10 pb-10 max-w-5xl">
-          <div className="mb-4 border-b-2 border-black pb-3 flex items-center gap-2">
+          <div className="mb-4 border-b-2 border-black dark:border-white/[0.06] pb-3 flex items-center gap-2 dark:text-white/80">
             <Settings2 className="h-4 w-4" />
             <p className="text-xs font-black uppercase tracking-widest">
               Todos os Usuários do Sistema
@@ -406,8 +406,8 @@ export default function Collaborators() {
               <Loader2 className="h-6 w-6 animate-spin text-gray-300" />
             </div>
           ) : (
-            <div className="border border-black">
-              <div className="grid grid-cols-12 px-4 py-2 bg-black text-white text-[10px] font-bold uppercase tracking-widest">
+            <div className="border border-black dark:border-white/[0.07] rounded-lg overflow-hidden">
+              <div className="grid grid-cols-12 px-4 py-2 bg-black dark:bg-white/[0.05] text-white text-[10px] font-bold uppercase tracking-widest">
                 <div className="col-span-4">Nome</div>
                 <div className="col-span-3">Email</div>
                 <div className="col-span-2">Role</div>
@@ -417,12 +417,12 @@ export default function Collaborators() {
               {allUsers.map((u, idx) => (
                 <div
                   key={u.id}
-                  className={`grid grid-cols-12 px-4 py-3 items-center border-b border-gray-100 last:border-b-0 ${
-                    idx % 2 === 0 ? "bg-white" : "bg-gray-50/50"
+                  className={`grid grid-cols-12 px-4 py-3 items-center border-b border-gray-100 dark:border-white/[0.05] last:border-b-0 ${
+                    idx % 2 === 0 ? "bg-white dark:bg-transparent" : "bg-gray-50/50 dark:bg-white/[0.02]"
                   }`}
                 >
-                  <div className="col-span-4 font-semibold text-sm truncate">{u.name ?? "—"}</div>
-                  <div className="col-span-3 text-xs text-gray-500 truncate flex items-center gap-1">
+                  <div className="col-span-4 font-semibold text-sm truncate dark:text-white/90">{u.name ?? "—"}</div>
+                  <div className="col-span-3 text-xs text-gray-500 dark:text-gray-400 truncate flex items-center gap-1">
                     <Mail className="h-3 w-3 shrink-0" />
                     {u.email ?? "—"}
                   </div>
@@ -461,7 +461,7 @@ export default function Collaborators() {
                       </span>
                     )}
                   </div>
-                  <div className="col-span-2 text-xs text-gray-400">{u.loginMethod ?? "—"}</div>
+                  <div className="col-span-2 text-xs text-gray-400 dark:text-gray-500">{u.loginMethod ?? "—"}</div>
                   <div className="col-span-1 flex justify-end">
                     {editingUserId !== u.id && (
                       <button
@@ -487,8 +487,8 @@ export default function Collaborators() {
           if (!v) { setShowInviteModal(false); setInviteLink(null); }
         }}
       >
-        <DialogContent className="max-w-md border-2 border-black p-0">
-          <div className="h-1.5 w-full bg-[oklch(0.45_0.22_27)]" />
+        <DialogContent className="max-w-md border-2 border-black dark:border-white/[0.1] p-0">
+          <div className="h-1.5 w-full bg-[oklch(0.45_0.22_27)] dark:bg-violet-600" />
           <div className="p-6">
             <DialogHeader className="mb-6">
               <DialogTitle className="text-2xl font-black tracking-tight">

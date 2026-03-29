@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { BarChart3, Bot, FolderOpen, LayoutDashboard, LogOut, PanelLeft, Tag, Trello, Upload, UserCog, Users } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
+import { BarChart3, Bot, FolderOpen, LayoutDashboard, LogOut, Moon, PanelLeft, Sun, Tag, Trello, Upload, UserCog, Users } from "lucide-react";
 import { CSSProperties, startTransition, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from "./DashboardLayoutSkeleton";
@@ -114,6 +115,7 @@ function DashboardLayoutContent({
   const { user, logout } = useAuth();
   const [location, setLocation] = useLocation();
   const { state, toggleSidebar, setOpenMobile } = useSidebar();
+  const { isDark, toggleTheme } = useTheme();
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -164,7 +166,7 @@ function DashboardLayoutContent({
               </button>
               {!isCollapsed && (
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="w-3 h-3 bg-[oklch(0.45_0.22_27)] shrink-0" />
+                  <div className="w-3 h-3 bg-[oklch(0.45_0.22_27)] dark:bg-violet-500 shrink-0" />
                   <span className="font-black tracking-tight text-white text-sm uppercase">
                     Task Tracker
                   </span>
@@ -191,8 +193,8 @@ function DashboardLayoutContent({
                           tooltip={item.label}
                           className={`h-10 rounded-md transition-all font-medium text-xs ${
                             isActive
-                              ? "bg-[oklch(0.45_0.22_27)] text-white hover:bg-[oklch(0.45_0.22_27)]"
-                              : "text-[oklch(0.65_0_0)] hover:bg-[oklch(0.45_0.22_27)]/20 hover:text-[oklch(0.92_0_0)]"
+                              ? "bg-[oklch(0.45_0.22_27)] text-white hover:bg-[oklch(0.45_0.22_27)] dark:bg-violet-500/15 dark:text-violet-300 dark:hover:bg-violet-500/20"
+                              : "text-[oklch(0.65_0_0)] hover:bg-[oklch(0.45_0.22_27)]/20 hover:text-[oklch(0.92_0_0)] dark:hover:bg-white/[0.05] dark:hover:text-white/90"
                           }`}
                         >
                           <item.icon className="h-4 w-4 shrink-0" />
@@ -235,7 +237,7 @@ function DashboardLayoutContent({
 
         {/* Resize handle */}
         <div
-          className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-[oklch(0.45_0.22_27)]/40 transition-colors ${isCollapsed ? "hidden" : ""}`}
+          className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-[oklch(0.45_0.22_27)]/40 dark:hover:bg-violet-500/30 transition-colors ${isCollapsed ? "hidden" : ""}`}
           onMouseDown={() => { if (!isCollapsed) setIsResizing(true); }}
           style={{ zIndex: 50 }}
         />
@@ -243,7 +245,7 @@ function DashboardLayoutContent({
 
       <SidebarInset>
         {/* Top bar with notification bell — always visible */}
-        <div className="flex border-b h-14 items-center justify-between bg-white px-4 sticky top-0 z-40 border-gray-100">
+        <div className="flex border-b h-14 items-center justify-between bg-white dark:bg-[#080B14] px-4 sticky top-0 z-40 border-gray-100 dark:border-[rgba(255,255,255,0.06)]">
           <div className="flex items-center gap-3">
             {isMobile && <SidebarTrigger className="h-8 w-8" />}
             {isMobile && (
@@ -256,10 +258,19 @@ function DashboardLayoutContent({
             )}
           </div>
           <div className="flex items-center gap-2 ml-auto">
+            <button
+              onClick={toggleTheme}
+              className="h-8 w-8 flex items-center justify-center rounded-md hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors"
+              aria-label="Toggle theme"
+            >
+              {isDark
+                ? <Sun className="h-4 w-4 text-yellow-400" />
+                : <Moon className="h-4 w-4 text-gray-500" />}
+            </button>
             <NotificationBell />
           </div>
         </div>
-        <main className="flex-1 min-h-screen bg-white">{children}</main>
+        <main className="flex-1 min-h-screen bg-white dark:bg-[#080B14]">{children}</main>
       </SidebarInset>
     </>
   );

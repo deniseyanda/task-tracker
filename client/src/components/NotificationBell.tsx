@@ -114,7 +114,7 @@ export default function NotificationBell() {
       {/* Bell button */}
       <button
         onClick={handleOpen}
-        className="relative h-9 w-9 flex items-center justify-center border border-transparent hover:border-black transition-colors"
+        className="relative h-9 w-9 flex items-center justify-center border border-transparent hover:border-black dark:hover:border-white/20 rounded-md transition-colors"
         title="Notificações"
         aria-label={`Notificações${hasUnread ? ` (${unreadCount} não lidas)` : ""}`}
       >
@@ -132,9 +132,9 @@ export default function NotificationBell() {
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 bg-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] z-50">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-[#0F1220] border-2 border-black dark:border-white/[0.1] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)] z-50 rounded-lg overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b-2 border-black">
+          <div className="flex items-center justify-between px-4 py-3 border-b-2 border-black dark:border-white/[0.07]">
             <div className="flex items-center gap-2">
               <span className="text-xs font-black uppercase tracking-widest">Notificações</span>
               {hasUnread && (
@@ -148,7 +148,7 @@ export default function NotificationBell() {
                 <button
                   onClick={() => markAllRead.mutate()}
                   disabled={markAllRead.isPending}
-                  className="text-[10px] font-bold uppercase tracking-wide text-gray-500 hover:text-black px-2 py-1 hover:bg-gray-100 transition-colors"
+                  className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white px-2 py-1 hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors rounded"
                   title="Marcar todas como lidas"
                 >
                   {markAllRead.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Ler todas"}
@@ -157,7 +157,7 @@ export default function NotificationBell() {
               <button
                 onClick={() => runJob.mutate()}
                 disabled={runJob.isPending}
-                className="text-[10px] font-bold uppercase tracking-wide text-gray-500 hover:text-black px-2 py-1 hover:bg-gray-100 transition-colors"
+                className="text-[10px] font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white px-2 py-1 hover:bg-gray-100 dark:hover:bg-white/[0.06] transition-colors rounded"
                 title="Verificar novas notificações agora"
               >
                 {runJob.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Atualizar"}
@@ -185,8 +185,8 @@ export default function NotificationBell() {
                   <div
                     key={notif.id}
                     onClick={() => handleNotifClick(notif.id, notif.read)}
-                    className={`flex items-start gap-3 px-4 py-3 border-b border-gray-100 cursor-pointer transition-colors ${
-                      isUnread ? "bg-gray-50 hover:bg-gray-100" : "hover:bg-gray-50"
+                    className={`flex items-start gap-3 px-4 py-3 border-b border-gray-100 dark:border-white/[0.05] cursor-pointer transition-colors ${
+                      isUnread ? "bg-gray-50 dark:bg-white/[0.04] hover:bg-gray-100 dark:hover:bg-white/[0.07]" : "hover:bg-gray-50 dark:hover:bg-white/[0.03]"
                     }`}
                   >
                     {/* Icon */}
@@ -194,7 +194,7 @@ export default function NotificationBell() {
                     {/* Content */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <p className={`text-xs font-bold leading-snug ${isUnread ? "text-black" : "text-gray-600"}`}>
+                        <p className={`text-xs font-bold leading-snug ${isUnread ? "text-black dark:text-white/90" : "text-gray-600 dark:text-gray-400"}`}>
                           {notif.title}
                         </p>
                         <button
@@ -205,7 +205,7 @@ export default function NotificationBell() {
                           <Trash2 className="h-3 w-3" />
                         </button>
                       </div>
-                      <p className="text-[11px] text-gray-500 leading-relaxed mt-0.5 line-clamp-2">
+                      <p className="text-[11px] text-gray-500 dark:text-gray-400 leading-relaxed mt-0.5 line-clamp-2">
                         {notif.message}
                       </p>
                       <p className="text-[10px] text-gray-400 mt-1">
@@ -224,15 +224,15 @@ export default function NotificationBell() {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-between">
-              <span className="text-[10px] text-gray-400">
+            <div className="px-4 py-2 border-t border-gray-100 dark:border-white/[0.06] flex items-center justify-between">
+              <span className="text-[10px] text-gray-400 dark:text-gray-500">
                 {notifications.length} notificação{notifications.length !== 1 ? "ões" : ""}
               </span>
               {notifications.some((n) => n.read === "1") && (
                 <button
                   onClick={() => clearRead.mutate()}
                   disabled={clearRead.isPending}
-                  className="text-[10px] font-bold uppercase tracking-wide text-gray-400 hover:text-[oklch(0.45_0.22_27)] transition-colors"
+                  className="text-[10px] font-bold uppercase tracking-wide text-gray-400 dark:text-gray-500 hover:text-[oklch(0.45_0.22_27)] dark:hover:text-violet-400 transition-colors"
                 >
                   {clearRead.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Limpar lidas"}
                 </button>

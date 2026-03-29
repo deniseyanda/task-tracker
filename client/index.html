@@ -2,6 +2,14 @@
 <html lang="en">
 
   <head>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("theme");
+          if (t === "dark") document.documentElement.classList.add("dark");
+        } catch (e) {}
+      })();
+    </script>
     <meta charset="UTF-8" />
     <meta
       name="viewport"

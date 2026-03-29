@@ -38,16 +38,16 @@ export default function Tags() {
     <DashboardLayout>
       <div className="p-6 md:p-10 max-w-3xl mx-auto">
         {/* Header */}
-        <div className="mb-10 border-b border-gray-100 pb-6 flex items-end justify-between">
+        <div className="mb-10 border-b border-gray-100 dark:border-white/[0.06] pb-6 flex items-end justify-between">
           <div>
-            <p className="text-[10px] font-medium tracking-wider text-[oklch(0.55_0.15_27)] mb-1.5">
+            <p className="text-[10px] font-medium tracking-wider text-[oklch(0.55_0.15_27)] dark:text-violet-400/70 mb-1.5">
               Classificação
             </p>
-            <h1 className="text-4xl font-black tracking-tight text-black">Tags</h1>
+            <h1 className="text-4xl font-black tracking-tight text-black dark:text-white">Tags</h1>
           </div>
           <Button
             onClick={() => setIsCreating(true)}
-            className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] text-sm font-semibold"
+            className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] dark:bg-violet-600 dark:hover:bg-violet-700 text-sm font-semibold"
           >
             <Plus className="h-4 w-4 mr-1.5" />
             Nova tag
@@ -63,8 +63,8 @@ export default function Tags() {
             <div className="w-20 h-20 rounded-2xl bg-gray-50 flex items-center justify-center mb-5 shadow-sm">
               <Tag className="h-10 w-10 text-gray-300" />
             </div>
-            <h3 className="text-base font-bold text-gray-700 mb-1.5">Nenhuma tag ainda</h3>
-            <p className="text-sm text-gray-400 mb-6 max-w-xs leading-relaxed">
+            <h3 className="text-base font-bold text-gray-700 dark:text-gray-300 mb-1.5">Nenhuma tag ainda</h3>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mb-6 max-w-xs leading-relaxed">
               Crie tags para categorizar e filtrar suas tarefas rapidamente
             </p>
             <Button
@@ -80,7 +80,7 @@ export default function Tags() {
             {tags.map((tag) => (
               <div
                 key={tag.id}
-                className="flex items-center gap-2 border rounded-lg px-3 py-2 group shadow-sm hover:shadow-md transition-shadow bg-white"
+                className="flex items-center gap-2 border rounded-lg px-3 py-2 group shadow-sm hover:shadow-md transition-shadow bg-white dark:bg-white/[0.03]"
                 style={{ borderColor: tag.color }}
               >
                 <div className="w-2.5 h-2.5 rounded-sm shrink-0" style={{ backgroundColor: tag.color }} />
@@ -100,8 +100,8 @@ export default function Tags() {
       </div>
 
       <Dialog open={isCreating} onOpenChange={(v) => !v && setIsCreating(false)}>
-        <DialogContent className="max-w-sm border border-gray-100 shadow-xl p-0">
-          <div className="h-1 w-full bg-[oklch(0.45_0.22_27)] rounded-t-lg" />
+        <DialogContent className="max-w-sm border border-gray-100 dark:border-white/[0.1] shadow-xl p-0">
+          <div className="h-1 w-full bg-[oklch(0.45_0.22_27)] dark:bg-violet-600 rounded-t-lg" />
           <div className="p-6">
             <DialogHeader className="mb-5">
               <DialogTitle className="text-xl font-bold tracking-tight">Nova tag</DialogTitle>

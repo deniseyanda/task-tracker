@@ -35,16 +35,16 @@ export default function Projects() {
     <DashboardLayout>
       <div className="p-6 md:p-10 max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-10 border-b border-gray-100 pb-6 flex items-end justify-between">
+        <div className="mb-10 border-b border-gray-100 dark:border-white/[0.06] pb-6 flex items-end justify-between">
           <div>
-            <p className="text-[10px] font-medium tracking-wider text-[oklch(0.55_0.15_27)] mb-1.5">
+            <p className="text-[10px] font-medium tracking-wider text-[oklch(0.55_0.15_27)] dark:text-violet-400/70 mb-1.5">
               Organização
             </p>
-            <h1 className="text-4xl font-black tracking-tight text-black">Projetos</h1>
+            <h1 className="text-4xl font-black tracking-tight text-black dark:text-white">Projetos</h1>
           </div>
           <Button
             onClick={() => setIsCreating(true)}
-            className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] text-sm font-semibold"
+            className="bg-black text-white hover:bg-[oklch(0.45_0.22_27)] dark:bg-violet-600 dark:hover:bg-violet-700 text-sm font-semibold"
           >
             <Plus className="h-4 w-4 mr-1.5" />
             Novo projeto
@@ -79,7 +79,7 @@ export default function Projects() {
               return (
                 <div
                   key={project.id}
-                  className="p-5 rounded-xl border border-gray-100 bg-white shadow-sm group hover:shadow-md hover:border-gray-200 transition-all"
+                  className="p-5 rounded-xl border border-gray-100 dark:border-white/[0.07] bg-white dark:bg-white/[0.03] shadow-sm group hover:shadow-md hover:border-gray-200 dark:hover:border-violet-500/30 transition-all"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div
@@ -105,13 +105,13 @@ export default function Projects() {
                       </button>
                     </div>
                   </div>
-                  <h3 className="text-base font-bold tracking-tight text-black mb-1">{project.name}</h3>
+                  <h3 className="text-base font-bold tracking-tight text-black dark:text-white/90 mb-1">{project.name}</h3>
                   {project.description && (
-                    <p className="text-xs text-gray-400 leading-relaxed mb-3 line-clamp-2">{project.description}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed mb-3 line-clamp-2">{project.description}</p>
                   )}
                   <div className="flex items-center gap-1 mt-2">
-                    <span className="text-xs font-semibold text-gray-600">{count}</span>
-                    <span className="text-xs text-gray-400">
+                    <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{count}</span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
                       {count === 1 ? "tarefa" : "tarefas"}
                     </span>
                   </div>
@@ -179,8 +179,8 @@ function ProjectModal({
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md border border-gray-100 shadow-xl p-0">
-        <div className="h-1 w-full bg-[oklch(0.45_0.22_27)] rounded-t-lg" />
+      <DialogContent className="max-w-md border border-gray-100 dark:border-white/[0.1] shadow-xl p-0">
+        <div className="h-1 w-full bg-[oklch(0.45_0.22_27)] dark:bg-violet-600 rounded-t-lg" />
         <div className="p-6">
           <DialogHeader className="mb-5">
             <DialogTitle className="text-xl font-bold tracking-tight">
