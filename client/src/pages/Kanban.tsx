@@ -21,9 +21,9 @@ const COLUMNS: { id: Status; label: string; color: string }[] = [
 ];
 
 const PRIORITY_STYLES: Record<Priority, string> = {
-  alta: "bg-[oklch(0.45_0.22_27)] text-white dark:bg-rose-500/20 dark:text-rose-300",
-  media: "bg-black text-white dark:bg-violet-500/20 dark:text-violet-300",
-  baixa: "bg-gray-100 text-gray-600 dark:bg-white/[0.06] dark:text-gray-400",
+  alta: "bg-[oklch(0.45_0.22_27)] text-white dark:bg-red-500/20 dark:text-red-300 dark:border dark:border-red-500/30",
+  media: "bg-black text-white dark:bg-yellow-500/20 dark:text-yellow-300 dark:border dark:border-yellow-500/30",
+  baixa: "bg-gray-100 text-gray-600 dark:bg-slate-500/20 dark:text-slate-300 dark:border dark:border-slate-500/30",
 };
 
 const PRIORITY_LABELS: Record<Priority, string> = {
@@ -138,7 +138,7 @@ export default function Kanban() {
                   placeholder="Buscar tarefas..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-8 h-9 text-sm w-48 border-black dark:border-white/[0.1] dark:bg-white/[0.04] dark:placeholder:text-gray-500"
+                  className="pl-8 h-9 text-sm w-48 border-black dark:border-white/10 dark:bg-white/5 dark:backdrop-blur-xl dark:placeholder:text-gray-500 dark:text-white focus:dark:ring-purple-500/50"
                 />
               </div>
               {/* Project filter */}
@@ -198,7 +198,7 @@ export default function Kanban() {
               )}
               <Button
                 onClick={() => { setCreateStatus("backlog"); setIsCreating(true); }}
-                className="h-9 bg-black text-white hover:bg-[oklch(0.45_0.22_27)] dark:bg-violet-600 dark:hover:bg-violet-700 text-xs font-bold uppercase tracking-wide"
+                className="h-9 bg-black text-white hover:bg-[oklch(0.45_0.22_27)] dark:bg-gradient-to-r dark:from-purple-500 dark:to-pink-500 dark:hover:opacity-90 dark:shadow-lg dark:shadow-purple-500/20 text-xs font-bold uppercase tracking-wide"
               >
                 <Plus className="h-4 w-4 mr-1" />
                 Nova Tarefa
@@ -312,7 +312,7 @@ function TaskCard({
       draggable
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      className={`kanban-card bg-white border border-gray-100 p-3 rounded-lg cursor-grab active:cursor-grabbing transition-all group shadow-sm ${
+      className={`kanban-card bg-white border border-gray-100 p-4 rounded-2xl cursor-grab active:cursor-grabbing transition-all group shadow-sm ${
         isDragging ? "opacity-40 rotate-1 shadow-none" : "hover:border-gray-300 hover:shadow-md"
       } ${isOverdue ? "border-l-4 border-l-[oklch(0.45_0.22_27)] dark:border-l-rose-500 rounded-l-none" : ""}`}
     >
@@ -344,7 +344,7 @@ function TaskCard({
 
       {/* Title */}
       <p
-        className="text-sm font-semibold text-black dark:text-white/90 leading-snug mb-2 cursor-pointer hover:text-[oklch(0.45_0.22_27)] dark:hover:text-violet-400 transition-colors"
+        className="text-sm font-medium text-black dark:text-white leading-snug mb-2 cursor-pointer hover:text-[oklch(0.45_0.22_27)] dark:hover:text-purple-300 transition-colors"
         onClick={onEdit}
       >
         {task.title}
@@ -361,8 +361,12 @@ function TaskCard({
           {task.tags.map((tag) => (
             <span
               key={tag.id}
-              className="text-[10px] font-medium px-1.5 py-0.5 border"
-              style={{ borderColor: tag.color, color: tag.color }}
+              className="text-[10px] font-medium px-2 py-0.5 rounded-lg border"
+              style={{
+                borderColor: tag.color,
+                color: tag.color,
+                backgroundColor: `${tag.color}22`,
+              }}
             >
               {tag.name}
             </span>

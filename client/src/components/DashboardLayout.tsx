@@ -67,7 +67,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-transparent">
         <div className="flex flex-col items-center gap-0 max-w-md w-full border border-black">
           {/* Red accent bar */}
           <div className="w-full h-2 bg-[oklch(0.45_0.22_27)]" />
@@ -98,6 +98,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <SidebarProvider style={{ "--sidebar-width": `${sidebarWidth}px` } as CSSProperties}>
+      {/* Dark mode decorative blur orbs */}
+      <div className="hidden dark:block fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-purple-500/15 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-500/15 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/3 w-80 h-80 bg-violet-500/10 rounded-full blur-3xl" />
+      </div>
       <DashboardLayoutContent setSidebarWidth={setSidebarWidth}>
         {children}
       </DashboardLayoutContent>
@@ -193,7 +199,7 @@ function DashboardLayoutContent({
                           tooltip={item.label}
                           className={`h-10 rounded-md transition-all font-medium text-xs ${
                             isActive
-                              ? "bg-[oklch(0.45_0.22_27)] text-white hover:bg-[oklch(0.45_0.22_27)] dark:bg-violet-500/15 dark:text-violet-300 dark:hover:bg-violet-500/20"
+                              ? "bg-[oklch(0.45_0.22_27)] text-white hover:bg-[oklch(0.45_0.22_27)] dark:bg-gradient-to-r dark:from-purple-500/25 dark:to-pink-500/15 dark:border dark:border-purple-500/30 dark:text-white dark:shadow-lg dark:shadow-purple-500/10"
                               : "text-[oklch(0.65_0_0)] hover:bg-[oklch(0.45_0.22_27)]/20 hover:text-[oklch(0.92_0_0)] dark:hover:bg-white/[0.05] dark:hover:text-white/90"
                           }`}
                         >
@@ -245,7 +251,7 @@ function DashboardLayoutContent({
 
       <SidebarInset>
         {/* Top bar with notification bell — always visible */}
-        <div className="flex border-b h-14 items-center justify-between bg-white dark:bg-[#080B14] px-4 sticky top-0 z-40 border-gray-100 dark:border-[rgba(255,255,255,0.06)]">
+        <div className="flex border-b h-14 items-center justify-between bg-white dark:bg-[rgba(15,23,42,0.8)] dark:backdrop-blur-lg px-4 sticky top-0 z-40 border-gray-100 dark:border-[rgba(148,163,184,0.1)]">
           <div className="flex items-center gap-3">
             {isMobile && <SidebarTrigger className="h-8 w-8" />}
             {isMobile && (
@@ -270,7 +276,7 @@ function DashboardLayoutContent({
             <NotificationBell />
           </div>
         </div>
-        <main className="flex-1 min-h-screen bg-white dark:bg-[#080B14]">{children}</main>
+        <main className="flex-1 min-h-screen bg-white dark:bg-transparent">{children}</main>
       </SidebarInset>
     </>
   );

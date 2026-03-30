@@ -79,7 +79,7 @@ export default function Projects() {
               return (
                 <div
                   key={project.id}
-                  className="p-5 rounded-xl border border-gray-100 dark:border-white/[0.07] bg-white dark:bg-white/[0.03] shadow-sm group hover:shadow-md hover:border-gray-200 dark:hover:border-violet-500/30 transition-all"
+                  className="p-5 rounded-2xl border border-gray-100 dark:border-white/[0.1] bg-white dark:bg-white/[0.04] dark:backdrop-blur-xl shadow-sm group hover:shadow-md hover:border-gray-200 dark:hover:border-purple-500/30 dark:hover:bg-white/[0.07] transition-all"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div

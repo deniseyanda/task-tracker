@@ -255,7 +255,7 @@ function StatCard({
   danger?: boolean;
 }) {
   return (
-    <div className="p-6 border-r border-black dark:border-white/[0.06] last:border-r-0 bg-white dark:bg-white/[0.02]">
+    <div className="p-6 border-r border-black dark:border-white/[0.08] last:border-r-0 bg-white dark:bg-white/[0.03] dark:backdrop-blur-xl">
       <div className={`mb-3 ${danger ? "text-[oklch(0.45_0.22_27)] dark:text-rose-400" : "text-gray-400 dark:text-gray-500"}`}>
         {icon}
       </div>
