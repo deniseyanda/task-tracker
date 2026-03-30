@@ -74,7 +74,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="p-12 flex flex-col items-start gap-8 w-full">
             <div className="flex flex-col gap-1">
               <p className="text-xs font-medium tracking-widest uppercase text-[oklch(0.45_0.22_27)]">
-                Task Tracker
+                TaskFlow
               </p>
               <h1 className="text-4xl font-black tracking-tight text-black leading-none">
                 Acesse sua<br />área de trabalho
@@ -168,7 +168,7 @@ function DashboardLayoutContent({
                 <div className="flex items-center gap-2 min-w-0">
                   <div className="w-3 h-3 bg-[oklch(0.45_0.22_27)] dark:bg-violet-500 shrink-0" />
                   <span className="font-black tracking-tight text-white text-sm uppercase">
-                    Task Tracker
+                    TaskFlow
                   </span>
                 </div>
               )}

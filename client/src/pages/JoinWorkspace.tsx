@@ -48,7 +48,7 @@ export default function JoinWorkspace() {
         <div className="flex flex-col items-start gap-6 w-full">
           <div className="flex flex-col gap-1">
             <p className="text-xs font-semibold tracking-widest uppercase text-[oklch(0.45_0.22_27)]">
-              Task Tracker
+              TaskFlow
             </p>
             <h1 className="text-3xl font-black tracking-tight text-black leading-tight">
               Você foi convidado para um workspace
